@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RWA Guardian Dashboard</title>
+    <link rel="stylesheet" href="styles.css?v=2">
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+</head>
+<body>
+    <header class="glass-header">
+        <h1>RWA Guardian - ASP Developer Sandbox</h1>
+        <div class="header-actions" style="display: flex; gap: 1rem; align-items: center;">
+            <span style="color: var(--text-muted); font-size: 0.85rem;">[ OKX Nano-Payment Protocol Active ]</span>
+        </div>
+    </header>
+
+    <main class="dashboard-grid" style="grid-template-columns: 1fr 1fr 1fr; margin-top: 2rem;">
+        <!-- Panel 1: ASP Sandbox Form -->
+        <section class="panel glass-panel asset-panel">
+            <h2>Query Risk Oracle API</h2>
+            <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 1rem;">
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <label style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Target Asset Name</label>
+                    <input type="text" id="api-asset" value="Tokyo Commercial Plaza" style="background: var(--bg-surface); border: 1px solid var(--border-color); color: white; padding: 0.8rem; font-family: 'JetBrains Mono'; border-radius: 4px;">
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+                        <label style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Latitude</label>
+                        <input type="text" id="api-lat" value="35.6895" style="background: var(--bg-surface); border: 1px solid var(--border-color); color: white; padding: 0.8rem; font-family: 'JetBrains Mono'; border-radius: 4px;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+                        <label style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Longitude</label>
+                        <input type="text" id="api-lon" value="139.6917" style="background: var(--bg-surface); border: 1px solid var(--border-color); color: white; padding: 0.8rem; font-family: 'JetBrains Mono'; border-radius: 4px;">
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <label style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">X-OKX-Payment-Signature (Header)</label>
+                    <input type="text" id="api-sig" placeholder="Leave blank to test 402 Error" style="background: var(--bg-surface); border: 1px solid var(--border-color); color: white; padding: 0.8rem; font-family: 'JetBrains Mono'; border-radius: 4px;">
+                </div>
+                <button id="query-api-btn" class="glow-btn" style="margin-top: 1rem; border-color: var(--neon-cyan); color: var(--neon-cyan);">POST /evaluate_rwa_risk (0.10 USDC)</button>
+            </div>
+        </section>
+
+        <!-- Panel 2: API Response -->
+        <section class="panel glass-panel threat-panel">
+            <h2>JSON Response Payload</h2>
+            <div class="threat-feed-container" id="api-response-container" style="background: var(--bg-surface); padding: 1rem; border: 1px solid var(--border-color); border-radius: 4px; overflow-y: auto; height: 350px;">
+                <pre id="api-response-code" style="margin: 0; color: var(--text-muted); font-size: 0.85rem; white-space: pre-wrap;">Awaiting API request...</pre>
+            </div>
+        </section>
+
+        <!-- Panel 3: AI Analysis -->
+        <section class="panel glass-panel ai-panel">
+            <h2>Swarm Intelligence Terminal</h2>
+            <div class="terminal-window" style="height: 350px;">
+                <div class="terminal-header">
+                    <span class="btn-red"></span><span class="btn-yellow"></span><span class="btn-green"></span>
+                    <span class="terminal-title">bash - Multi-Agent Consensus</span>
+                </div>
+                <div class="terminal-body" id="ai-analysis-text">
+                    > Initializing RWA Guardian AI...<br>
+                    > Standing by for Oracle queries...<br>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="app.js?v=9"></script>
+</body>
+</html>

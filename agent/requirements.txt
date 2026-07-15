@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+httpx
+web3
+openai
+python-dotenv
+pydantic

@@ -30,9 +30,8 @@ Output a JSON object:
   "decision": "APPROVED" | "REJECTED",
   "reasoning": "<detailed explanation of why you approve or reject>",
   "modifications": {
-    "should_pause_trading": <bool — your recommended override, if any>,
-    "recommended_health_score": <int — your adjusted score, or null to keep original>,
-    "recommended_yield_rate": <int — your adjusted rate, or null to keep original>
+    "recommendedAction": <string — your recommended override action, or null to keep original>,
+    "overallRisk": <int — your adjusted score, or null to keep original>
   },
   "risk_of_false_positive": <float 0.0-1.0>,
   "summary": "<one sentence verdict>"
@@ -90,11 +89,10 @@ class ConsensusValidatorAgent(BaseAgent):
             return json.loads(response.choices[0].message.content)
         except Exception as e:
             logger.error(f"Consensus validation LLM failed: {e}")
-            # On failure, default to REJECTING critical actions (safety first)
             return {
-                "decision": "REJECTED" if verdict.get("should_pause_trading") else "APPROVED",
+                "decision": "REJECTED" if verdict.get("recommendedAction") in ["pauseNewBorrowing", "freezeTransfers"] else "APPROVED",
                 "reasoning": f"Validation failed ({e}). Rejecting critical actions as a safety measure.",
-                "modifications": {"should_pause_trading": False},
+                "modifications": {"recommendedAction": "normal"},
                 "risk_of_false_positive": 0.8,
                 "summary": "Validation error — critical actions blocked for safety."
             }
@@ -114,11 +112,11 @@ class ConsensusValidatorAgent(BaseAgent):
                 verdict = msg.payload.get("verdict", {})
                 source_reports = msg.payload.get("source_reports", [])
 
-                is_critical = verdict.get("should_pause_trading", False)
+                is_critical = verdict.get("recommendedAction") in ["pauseNewBorrowing", "freezeTransfers"]
 
                 if is_critical:
                     # Critical action: run full independent validation
-                    await self.log(f"⚠️ CRITICAL ACTION requested for {prop_info.get('name', prop_id)}: PAUSE TRADING. Running independent validation...", prop_id)
+                    await self.log(f"⚠️ CRITICAL ACTION requested for {prop_info.get('name', prop_id)}: {verdict.get('recommendedAction')}. Running independent validation...", prop_id)
                     validation = await self.validate(verdict, source_reports, prop_info)
                 else:
                     # Non-critical: auto-approve with logging
@@ -134,12 +132,10 @@ class ConsensusValidatorAgent(BaseAgent):
                 # Apply any modifications from the validator
                 modifications = validation.get("modifications", {})
                 final_verdict = verdict.copy()
-                if modifications.get("should_pause_trading") is not None:
-                    final_verdict["should_pause_trading"] = modifications["should_pause_trading"]
-                if modifications.get("recommended_health_score") is not None:
-                    final_verdict["recommended_health_score"] = modifications["recommended_health_score"]
-                if modifications.get("recommended_yield_rate") is not None:
-                    final_verdict["recommended_yield_rate"] = modifications["recommended_yield_rate"]
+                if modifications.get("recommendedAction") is not None:
+                    final_verdict["recommendedAction"] = modifications["recommendedAction"]
+                if modifications.get("overallRisk") is not None:
+                    final_verdict["overallRisk"] = modifications["overallRisk"]
 
                 decision = validation.get("decision", "APPROVED")
                 await self.log(

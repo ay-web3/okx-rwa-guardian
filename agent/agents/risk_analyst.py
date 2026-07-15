@@ -8,32 +8,37 @@ from message_bus import MessageBus, MessageType, Message
 
 logger = logging.getLogger(__name__)
 
-RISK_ANALYST_PROMPT = """You are the Senior Risk Analyst for RWA Guardian, a multi-agent AI system protecting tokenized real estate assets.
+RISK_ANALYST_PROMPT = """You are the Senior Risk Analyst (Reasoning Agent) for RWA Guardian, a multi-agent AI system protecting tokenized real estate assets.
 
-You receive classified threat data from two specialist agents:
+You receive classified threat data from the Data Collector agent:
 1. Weather Sentinel — environmental threats (hurricanes, earthquakes, floods)
 2. News Intelligence — market/economic/regulatory threats
 
-Your job is to SYNTHESIZE all incoming intelligence and produce a single, authoritative risk verdict for the property.
+Your job is to SYNTHESIZE all incoming intelligence and produce a multi-dimensional risk verdict for the property.
 
 Consider:
 - Cross-correlation: Does the news CONFIRM the weather threat, or is it unrelated?
-- False positive rate: If the Weather Sentinel says LOW and News Intel says NEUTRAL, the property is fine.
 - Cumulative risk: Multiple LOW threats can compound into MEDIUM overall risk.
-- Positive catalysts: Good news should INCREASE yield and health, not just reduce it less.
+- Actionable Intelligence: Don't just output a risk number. Recommend a specific action the protocol should take based on the overall risk level:
+    - Normal (0-20): "normal"
+    - Elevated (21-50): "increaseMonitoring"
+    - High (51-80): "raiseCollateralRatio"
+    - Critical (81-90): "pauseNewBorrowing"
+    - Extreme (91-100): "freezeTransfers"
 
-Output a JSON object:
+Output a JSON object exactly like this:
 {
-  "threat_level": "NONE" | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
-  "recommended_health_score": <int 0-100>,
-  "recommended_yield_rate": <int 0-200, where 100 is normal>,
-  "should_pause_trading": <bool — ONLY true for CRITICAL confirmed threats>,
+  "physicalRisk": <int 0-100>,
+  "economicRisk": <int 0-100>,
+  "liquidityRisk": <int 0-100>,
+  "overallRisk": <int 0-100>,
+  "recommendedAction": "normal" | "increaseMonitoring" | "raiseCollateralRatio" | "pauseNewBorrowing" | "freezeTransfers",
   "confidence": <float 0.0-1.0, how confident you are in this verdict>,
   "analysis": "<detailed reasoning explaining your synthesis of all agent inputs>",
   "dissenting_factors": "<any factors that argue AGAINST your verdict>"
 }
 
-IMPORTANT: You are recommending, not executing. The Consensus Validator will review your verdict before any on-chain action is taken. Be honest about uncertainty.
+IMPORTANT: You are recommending, not executing. The Verification Agent will review your verdict before any on-chain action is taken. Be honest about uncertainty.
 Only output valid JSON. No markdown."""
 
 
@@ -60,10 +65,11 @@ class RiskAnalystAgent(BaseAgent):
         """Run senior LLM analysis on all collected threat data."""
         if not self.client:
             return {
-                "threat_level": "UNKNOWN",
-                "recommended_health_score": 100,
-                "recommended_yield_rate": 100,
-                "should_pause_trading": False,
+                "physicalRisk": 0,
+                "economicRisk": 0,
+                "liquidityRisk": 0,
+                "overallRisk": 0,
+                "recommendedAction": "normal",
                 "confidence": 0.0,
                 "analysis": "No API key configured.",
                 "dissenting_factors": "N/A"
@@ -85,10 +91,11 @@ class RiskAnalystAgent(BaseAgent):
         except Exception as e:
             logger.error(f"Risk Analyst LLM synthesis failed: {e}")
             return {
-                "threat_level": "ERROR",
-                "recommended_health_score": 100,
-                "recommended_yield_rate": 100,
-                "should_pause_trading": False,
+                "physicalRisk": 0,
+                "economicRisk": 0,
+                "liquidityRisk": 0,
+                "overallRisk": 0,
+                "recommendedAction": "normal",
                 "confidence": 0.0,
                 "analysis": f"Synthesis error: {e}",
                 "dissenting_factors": "Analysis failed"
@@ -130,7 +137,7 @@ class RiskAnalystAgent(BaseAgent):
                         {
                             "verdict": verdict,
                             "source_reports": self._threat_buffer[prop_id],
-                            "summary": f"🧠 {verdict.get('threat_level', 'UNKNOWN')} risk | Health: {verdict.get('recommended_health_score', 100)} | Pause: {verdict.get('should_pause_trading', False)} | Confidence: {verdict.get('confidence', 0):.0%}"
+                            "summary": f"🧠 Risk: {verdict.get('overallRisk', 0)}/100 | Action: {verdict.get('recommendedAction', 'normal')} | Confidence: {verdict.get('confidence', 0):.0%}"
                         }
                     )
 

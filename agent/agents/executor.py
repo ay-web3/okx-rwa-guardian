@@ -27,9 +27,16 @@ class ExecutorAgent(BaseAgent):
             return "Property not found"
 
         tx_logs = ""
-        new_paused = verdict.get("should_pause_trading", prop["paused"])
-        new_yield = verdict.get("recommended_yield_rate", prop.get("yield_rate", 100))
-        new_health = verdict.get("recommended_health_score", prop.get("health_score", 100))
+        new_paused = verdict.get("recommendedAction") in ["pauseNewBorrowing", "freezeTransfers"]
+        
+        # Map recommended action to visual yield penalty for the demo
+        new_yield = 100
+        if verdict.get("recommendedAction") == "raiseCollateralRatio":
+            new_yield = 50
+            
+        # Map overall risk (0-100) to health score (100-0)
+        overall_risk = verdict.get("overallRisk", 0)
+        new_health = 100 - overall_risk
 
         # Update yield if changed and not pausing
         if new_yield != prop.get("yield_rate", 100) and not new_paused:
@@ -96,7 +103,8 @@ class ExecutorAgent(BaseAgent):
                     )
                     # Still update informational state (health, analysis) but NOT paused status
                     if prop:
-                        prop["health_score"] = final_verdict.get("recommended_health_score", prop.get("health_score", 100))
+                        overall_risk = final_verdict.get("overallRisk", 0)
+                        prop["health_score"] = 100 - overall_risk
                         prop["latest_analysis"] = f"[BLOCKED BY CONSENSUS] {final_verdict.get('analysis', 'Action rejected.')}"
 
             except asyncio.TimeoutError:

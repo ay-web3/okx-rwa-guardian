@@ -10,33 +10,32 @@ Acting as an **Agentic Service Provider (ASP)**, RWA Guardian bridges the physic
 
 This project was built specifically for the **OKX.AI Genesis Hackathon**. It perfectly demonstrates the power of Agentic Service Providers in DeFi:
 1. **Agent-to-Agent Commerce:** Uses the OKX Agent Payments Protocol (APP) to charge nano-payments (0.10 USDC) to external bots in exchange for AI risk intelligence.
-2. **Multi-Agent Swarm Architecture:** Instead of a monolithic LLM script, we implemented a robust 5-agent consensus mechanism to eliminate AI hallucinations and false positives.
+2. **Multi-Agent Swarm Architecture:** Instead of a monolithic LLM script, we implemented a robust 4-agent pipeline to eliminate AI hallucinations and false positives.
 3. **Real-World Integration:** Brings off-chain physical data (NOAA, USGS) on-chain via AI reasoning rather than traditional, rigid oracles.
 
 ---
 
 ## 🧠 The Multi-Agent Swarm Architecture
 
-To ensure the safety of on-chain assets, no single AI makes a critical decision. We built an asynchronous message bus where 5 specialized agents collaborate:
+To ensure the safety of on-chain assets, no single AI makes a critical decision. We built an asynchronous message bus where 4 distinct roles collaborate:
 
-1. 🌊 **Weather Sentinel:** Polls NOAA (Severe Weather) and USGS (Earthquakes). Evaluates environmental risk based on property coordinates.
-2. 📰 **News Intelligence:** Scrapes Google News for local economic/regulatory data. Uses an LLM to filter financial clickbait from genuine market-moving threats.
-3. 🧠 **Risk Analyst (Senior Reasoner):** Synthesizes intelligence from field agents into a single Risk Verdict (Health Score, Yield Rate, and Pause Recommendations).
-4. ⚖️ **Consensus Validator:** Acts as an independent auditor. It actively challenges the Risk Analyst's recommendation, requiring overwhelming evidence before approving a critical threat alert.
-5. 🔐 **Payload Signer:** The agent holding the ASP's private keys. It cryptographically signs the final consensus payload (the "Signal"), proving to the paying Web3 agent that the data is authentic and untampered.
+1. 📡 **Data Collector:** Gathers raw environmental (NOAA/USGS) and economic (Google News) JSON data.
+2. 🧠 **Reasoning Agent (Risk Analyst):** Synthesizes the heterogenous data to produce multi-dimensional physical, economic, and liquidity risk scores, and recommends protocol actions (e.g., `raiseCollateralRatio`).
+3. ⚖️ **Verification Agent:** Acts as an independent auditor. It actively checks the Reasoning Agent's evidence, confidence, and consistency before approving critical actions.
+4. 🔐 **Signer:** The agent holding the ASP's private keys. It cryptographically signs the final consensus payload (the "Signal"). This signature allows protocols to verify the payload originated from RWA Guardian and was not modified in transit, ensuring strict provenance and authenticity.
 
 ---
 
 ## ⚙️ How It Works (The "Signal vs. Action" Model)
 
-RWA Guardian is fully integrated with the **OKX Agent Payments Protocol (APP)** and the **OKX Agentic Wallet**. We operate as a **Pure AI Risk Oracle**, selling our 5-agent consensus directly to other Web3 agents via nano-payments.
+RWA Guardian is fully integrated with the **OKX Agent Payments Protocol (APP)** and the **OKX Agentic Wallet**. We operate as a **Pure AI Decision Oracle**, selling our 4-agent consensus directly to other Web3 agents via nano-payments.
 
 By splitting the architecture into "Signal" (Our API) and "Action" (The Client's Wallet), we achieve 100% security with zero gas-abstraction issues.
 
 ### The Target Markets
 
 **1. Protocol Developers (Smart Contract Security)**
-A DeFi protocol developer connects their own local OKX Agentic Wallet to our ASP. They pay us **0.10 USDC** via the APP header to hit our `POST /evaluate_rwa_risk` endpoint. Our AI swarm processes the real-world data and returns a cryptographically signed instruction payload (e.g., `{"recommended_action": "pauseTrading"}`). The developer's *own* local Agentic Wallet verifies the signature and executes the transaction using their own private keys.
+A DeFi protocol developer connects their own local OKX Agentic Wallet to our ASP. They pay us **0.10 USDC** via the APP header to hit our `POST /evaluate_rwa_risk` endpoint. Our AI swarm processes the real-world data and returns a cryptographically signed instruction payload with structured actions (e.g., `{"recommendedAction": "raiseCollateralRatio"}`). The developer's *own* local Agentic Wallet verifies the signature and executes the transaction using their own private keys.
 
 **2. Algorithmic Traders (Informational Arbitrage)**
 Traders pay us **0.10 USDC** to feed our risk assessments directly into their high-frequency trading bots. If our swarm detects a massive earthquake hitting a tokenized physical asset before the mainstream markets react, the trader's bot uses its OKX Agentic Wallet to instantly dump the token or open a short position on a DEX.

@@ -24,6 +24,7 @@ Rules:
 - For PAUSE TRADING recommendations: You must see STRONG, CONFIRMED evidence. A single news headline is NOT enough. Require multiple sources or a genuine NOAA severe weather warning.
 - For yield adjustments: Be more lenient. Small adjustments based on moderate evidence are acceptable.
 - For health score changes: Be lenient. These are informational and don't affect the contract.
+- For "normal" actions (DO NOTHING): If the environment is safe, you MUST output "APPROVED". Only "REJECT" a normal action if you believe a severe risk was dangerously ignored.
 
 Output a JSON object:
 {

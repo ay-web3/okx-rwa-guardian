@@ -4,6 +4,7 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Header, HTTPException, Depends
 from fastapi.responses import HTMLResponse
+from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -115,7 +116,36 @@ async def lifespan(app: FastAPI):
 # FastAPI App
 # ──────────────────────────────────────────────
 
-app = FastAPI(title="RWA Guardian — Multi-Agent AI System", lifespan=lifespan)
+description = """
+**RWA Guardian** is an autonomous AI Decision Oracle that bridges the physical world and the blockchain.
+
+### OKX.AI Marketplace
+- **Agent ID:** `#6007`
+- **Role:** `Agentic Service Provider (ASP)`
+- **Cost:** `0.10 USDC per query` (via OKX Agent Payments Protocol)
+
+### Core Capabilities
+This API allows smart contracts and external Web3 agents to query real-time, multi-dimensional risk assessments for tokenized Real-World Assets. The 4-agent swarm automatically correlates NOAA weather alerts, USGS earthquake data, and Google News sentiment into actionable protocol decisions (e.g., `raiseCollateralRatio`).
+"""
+
+app = FastAPI(
+    title="RWA Guardian — AI Decision Oracle",
+    description=description,
+    version="1.0.0",
+    lifespan=lifespan,
+    docs_url=None,  # We will override this to provide a custom dark theme
+    redoc_url=None
+)
+
+@app.get("/docs", include_in_schema=False)
+async def custom_swagger_ui_html():
+    return get_swagger_ui_html(
+        openapi_url=app.openapi_url,
+        title=app.title + " - API Docs",
+        oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
+        swagger_js_url="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js",
+        swagger_css_url="https://cdn.jsdelivr.net/npm/swagger-ui-themes@3.0.0/themes/3.x/theme-material.css",
+    )
 
 app.add_middleware(
     CORSMiddleware,
@@ -257,9 +287,9 @@ async def log_error(payload: ErrorPayload):
 
 
 class DynamicEvaluatePayload(BaseModel):
-    asset_name: str
-    lat: float
-    lon: float
+    asset_name: str = "Miami Condo"
+    lat: float = 25.79
+    lon: float = -80.13
 
 async def verify_okx_nano_payment(x_okx_payment_signature: Optional[str] = Header(None)):
     """

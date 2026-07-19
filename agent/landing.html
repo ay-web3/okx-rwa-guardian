@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RWA Guardian — AI Decision Oracle for Tokenized Real-World Assets</title>
+    <meta name="description" content="An autonomous multi-agent AI Decision Oracle that bridges the physical world and the blockchain, providing real-time risk intelligence for tokenized Real-World Assets.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-deep: #0a0a0f;
+            --bg-card: rgba(15, 15, 25, 0.7);
+            --border: rgba(255, 255, 255, 0.06);
+            --border-hover: rgba(255, 255, 255, 0.12);
+            --text-primary: #e8e8ed;
+            --text-secondary: #8b8b9e;
+            --text-muted: #55556a;
+            --accent-cyan: #00d4ff;
+            --accent-green: #00ff88;
+            --accent-amber: #ffb800;
+            --accent-red: #ff4466;
+            --accent-purple: #a855f7;
+            --glow-cyan: 0 0 30px rgba(0, 212, 255, 0.15);
+            --glow-green: 0 0 30px rgba(0, 255, 136, 0.15);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Animated gradient background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(0, 212, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(168, 85, 247, 0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(0, 255, 136, 0.02) 0%, transparent 60%);
+            z-index: -1;
+            animation: bgShift 12s ease-in-out infinite alternate;
+        }
+
+        @keyframes bgShift {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+
+        /* ── Hero ── */
+        .hero {
+            padding: 5rem 0 4rem;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(0, 212, 255, 0.08);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 100px;
+            padding: 0.4rem 1.2rem;
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+        }
+
+        .hero-badge .dot {
+            width: 6px; height: 6px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,255,136,0.4); }
+            50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(0,255,136,0); }
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 .gradient {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-sub {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            max-width: 680px;
+            margin: 0 auto 2.5rem;
+            font-weight: 400;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.8rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-cyan), #0099cc);
+            color: #000;
+            box-shadow: var(--glow-cyan);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-hover);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        /* ── Sections ── */
+        section { padding: 4rem 0; }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--accent-cyan);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-desc {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin-bottom: 2.5rem;
+            font-size: 1.05rem;
+        }
+
+        /* ── Problem/Solution ── */
+        .problem-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--border-hover);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .card p { color: var(--text-secondary); font-size: 0.95rem; }
+
+        .card-red { border-left: 3px solid var(--accent-red); }
+        .card-green { border-left: 3px solid var(--accent-green); }
+
+        /* ── Pipeline ── */
+        .pipeline {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .pipe-step {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .pipe-step:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: var(--glow-cyan);
+            transform: translateY(-3px);
+        }
+
+        .pipe-step::after {
+            content: '→';
+            position: absolute;
+            right: -1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.2rem;
+        }
+
+        .pipe-step:last-child::after { display: none; }
+
+        .pipe-emoji { font-size: 2rem; margin-bottom: 0.75rem; }
+        .pipe-step h3 { font-size: 0.9rem; margin-bottom: 0.3rem; }
+        .pipe-step p { color: var(--text-secondary); font-size: 0.8rem; }
+
+        /* ── JSON Block ── */
+        .json-block {
+            background: rgba(10, 10, 20, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 2rem 0;
+        }
+
+        .json-header {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .json-header span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .json-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .json-dots span {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+        }
+
+        .json-dots span:nth-child(1) { background: #ff5f57; }
+        .json-dots span:nth-child(2) { background: #ffbd2e; }
+        .json-dots span:nth-child(3) { background: #28ca42; }
+
+        .json-body {
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .json-key { color: var(--accent-cyan); }
+        .json-string { color: var(--accent-green); }
+        .json-number { color: var(--accent-amber); }
+        .json-comment { color: var(--text-muted); font-style: italic; }
+
+        /* ── Comparison Table ── */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            font-size: 0.9rem;
+        }
+
+        .comparison-table th, .comparison-table td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table th {
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+        }
+
+        .comparison-table td { color: var(--text-secondary); }
+        .comparison-table td:first-child { color: var(--text-primary); font-weight: 500; }
+        .comparison-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+        .tag {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .tag-cyan { background: rgba(0, 212, 255, 0.1); color: var(--accent-cyan); }
+        .tag-amber { background: rgba(255, 184, 0, 0.1); color: var(--accent-amber); }
+        .tag-green { background: rgba(0, 255, 136, 0.1); color: var(--accent-green); }
+        .tag-red { background: rgba(255, 68, 102, 0.1); color: var(--accent-red); }
+        .tag-purple { background: rgba(168, 85, 247, 0.1); color: var(--accent-purple); }
+
+        /* ── Action Space Table ── */
+        .action-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            font-size: 0.9rem;
+        }
+
+        .action-table th, .action-table td {
+            padding: 0.9rem 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .action-table th {
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+        }
+
+        .action-table td { color: var(--text-secondary); }
+
+        .action-table code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        /* ── Tech Stack Grid ── */
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .tech-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .tech-item .label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .tech-item .value {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        /* ── Live Status ── */
+        .live-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .live-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .live-check {
+            width: 32px;
+            height: 32px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-green);
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .live-item a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .live-item a:hover { text-decoration: underline; }
+
+        /* ── Divider ── */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 2rem 0;
+        }
+
+        /* ── Footer ── */
+        footer {
+            padding: 3rem 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+        }
+
+        footer a { color: var(--accent-cyan); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .problem-grid, .pipeline, .tech-grid, .live-grid { grid-template-columns: 1fr; }
+            .pipe-step::after { display: none; }
+            .comparison-table, .action-table { font-size: 0.8rem; }
+            .comparison-table th, .comparison-table td,
+            .action-table th, .action-table td { padding: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-badge">
+            <span class="dot"></span>
+            OKX.AI Marketplace · Agent #6007
+        </div>
+        <h1>🛡️ RWA <span class="gradient">Guardian</span></h1>
+        <p class="hero-sub">
+            An autonomous AI Decision Oracle that bridges the physical world and the blockchain — providing real-time, multi-dimensional risk intelligence for tokenized Real-World Assets.
+        </p>
+        <div class="hero-cta">
+            <a href="https://github.com/ay-web3/okx-rwa-guardian" target="_blank" class="btn btn-primary">⭐ View on GitHub</a>
+            <a href="/docs" class="btn btn-outline">📄 API Docs</a>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Problem / Solution -->
+    <section>
+        <div class="section-label">The Problem</div>
+        <h2>Smart contracts are blind to the physical world</h2>
+        <p class="section-desc">
+            DeFi is tokenizing physical assets — real estate, commodities, infrastructure — and putting them on-chain. But when a hurricane destroys a tokenized building, the blockchain doesn't know.
+        </p>
+        <div class="problem-grid">
+            <div class="card card-red">
+                <div class="card-icon">🌪️</div>
+                <h3>Without RWA Guardian</h3>
+                <p>A Category 3 hurricane hits Miami. The tokenized condo is destroyed. Lending protocols keep issuing loans against it. Insurance doesn't trigger. Traders buy at full price. Nobody knows until it's too late.</p>
+            </div>
+            <div class="card card-green">
+                <div class="card-icon">🛡️</div>
+                <h3>With RWA Guardian</h3>
+                <p>Our AI swarm detects the hurricane from NOAA, correlates it with local news and economic data, and returns a signed decision: <code>raiseCollateralRatio</code>. The lending protocol automatically tightens requirements — before the storm makes landfall.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Pipeline -->
+    <section>
+        <div class="section-label">Architecture</div>
+        <h2>4-Agent AI Pipeline</h2>
+        <p class="section-desc">No single AI makes a critical decision alone. Four distinct roles collaborate through an asynchronous message bus.</p>
+        <div class="pipeline">
+            <div class="pipe-step">
+                <div class="pipe-emoji">📡</div>
+                <h3>Data Collector</h3>
+                <p>Gathers raw JSON from NOAA, USGS, and Google News</p>
+            </div>
+            <div class="pipe-step">
+                <div class="pipe-emoji">🧠</div>
+                <h3>Reasoning Agent</h3>
+                <p>Produces multi-dimensional risk scores and recommends actions</p>
+            </div>
+            <div class="pipe-step">
+                <div class="pipe-emoji">⚖️</div>
+                <h3>Verification Agent</h3>
+                <p>Independently audits evidence, confidence, and consistency</p>
+            </div>
+            <div class="pipe-step">
+                <div class="pipe-emoji">🔐</div>
+                <h3>Signer</h3>
+                <p>Cryptographically signs the final payload for provenance</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- API Response -->
+    <section>
+        <div class="section-label">API Output</div>
+        <h2>Structured decisions, not just data</h2>
+        <p class="section-desc">Our API returns protocol-ready intelligence that smart contracts can consume directly — no additional AI processing needed.</p>
+
+        <div class="json-block">
+            <div class="json-header">
+                <div class="json-dots"><span></span><span></span><span></span></div>
+                <span>POST /evaluate_rwa_risk — 200 OK</span>
+            </div>
+            <div class="json-body">
+{<br>
+&nbsp;&nbsp;<span class="json-key">"physicalRisk"</span>: <span class="json-number">74</span>,<br>
+&nbsp;&nbsp;<span class="json-key">"economicRisk"</span>: <span class="json-number">61</span>,<br>
+&nbsp;&nbsp;<span class="json-key">"liquidityRisk"</span>: <span class="json-number">49</span>,<br>
+&nbsp;&nbsp;<span class="json-key">"overallRisk"</span>: <span class="json-number">68</span>,<br>
+&nbsp;&nbsp;<span class="json-key">"recommendedAction"</span>: <span class="json-string">"raiseCollateralRatio"</span>,<br>
+&nbsp;&nbsp;<span class="json-key">"confidence"</span>: <span class="json-number">0.94</span>,<br>
+&nbsp;&nbsp;<span class="json-key">"analysis"</span>: <span class="json-string">"Category 3 hurricane warning within 80km..."</span>,<br>
+&nbsp;&nbsp;<span class="json-key">"signature"</span>: <span class="json-string">"0x3a8f...c4e1"</span><br>
+}
+            </div>
+        </div>
+
+        <table class="action-table">
+            <thead>
+                <tr>
+                    <th>Overall Risk</th>
+                    <th>Recommended Action</th>
+                    <th>Protocol Effect</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="tag tag-green">0 – 20</span></td>
+                    <td><code>normal</code></td>
+                    <td>No action needed</td>
+                </tr>
+                <tr>
+                    <td><span class="tag tag-cyan">21 – 50</span></td>
+                    <td><code>increaseMonitoring</code></td>
+                    <td>Increase polling frequency</td>
+                </tr>
+                <tr>
+                    <td><span class="tag tag-amber">51 – 80</span></td>
+                    <td><code>raiseCollateralRatio</code></td>
+                    <td>Increase collateral requirements</td>
+                </tr>
+                <tr>
+                    <td><span class="tag tag-red">81 – 90</span></td>
+                    <td><code>pauseNewBorrowing</code></td>
+                    <td>Halt new loan origination</td>
+                </tr>
+                <tr>
+                    <td><span class="tag tag-purple">91 – 100</span></td>
+                    <td><code>freezeTransfers</code></td>
+                    <td>Emergency freeze all transfers</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Oracle Comparison -->
+    <section>
+        <div class="section-label">Why Not a Traditional Oracle?</div>
+        <h2>Data feeds vs. decision intelligence</h2>
+        <p class="section-desc">Traditional oracles move data points on-chain. We reason about them and return actionable decisions.</p>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Traditional Oracle</th>
+                    <th>RWA Guardian</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Output</td>
+                    <td>Raw data point (a number)</td>
+                    <td>Structured decision with reasoning</td>
+                </tr>
+                <tr>
+                    <td>Intelligence</td>
+                    <td>None — pure relay</td>
+                    <td>Multi-agent AI synthesis</td>
+                </tr>
+                <tr>
+                    <td>Data Sources</td>
+                    <td>Usually one per feed</td>
+                    <td>Correlates weather + news + seismic + economic</td>
+                </tr>
+                <tr>
+                    <td>Logic Owner</td>
+                    <td>The protocol developer writes it all</td>
+                    <td>The AI handles reasoning for you</td>
+                </tr>
+                <tr>
+                    <td>Ambiguity</td>
+                    <td>No — binary thresholds only</td>
+                    <td>Weighs confidence and dissenting factors</td>
+                </tr>
+                <tr>
+                    <td>Novel Events</td>
+                    <td>Fails silently (no rule = no action)</td>
+                    <td>AI can reason about unseen scenarios</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="card" style="margin-top: 1.5rem; border-left: 3px solid var(--accent-cyan);">
+            <p style="font-size: 0.95rem; color: var(--text-secondary);">
+                <strong style="color: var(--accent-cyan);">The analogy:</strong> Chainlink tells you the temperature is 95°F. RWA Guardian tells you that temperature, combined with the hurricane warning and the local insurance cost spike, means you should raise your collateral ratio to 170% before the storm makes landfall.
+            </p>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Tech Stack -->
+    <section>
+        <div class="section-label">Built With</div>
+        <h2>Tech Stack</h2>
+        <div class="tech-grid">
+            <div class="tech-item">
+                <div class="label">AI / LLM</div>
+                <div class="value">Llama 3 via Groq API</div>
+            </div>
+            <div class="tech-item">
+                <div class="label">Backend</div>
+                <div class="value">Python · FastAPI · Asyncio</div>
+            </div>
+            <div class="tech-item">
+                <div class="label">Blockchain</div>
+                <div class="value">Solidity · OKX X Layer</div>
+            </div>
+            <div class="tech-item">
+                <div class="label">Frontend</div>
+                <div class="value">Vanilla JS · CSS3</div>
+            </div>
+            <div class="tech-item">
+                <div class="label">Payments</div>
+                <div class="value">OKX APP / x402</div>
+            </div>
+            <div class="tech-item">
+                <div class="label">Data Oracles</div>
+                <div class="value">NOAA · USGS · Google News</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Live Status -->
+    <section>
+        <div class="section-label">Deployment</div>
+        <h2>What's Live Right Now</h2>
+        <div class="live-grid">
+            <div class="live-item">
+                <div class="live-check">✓</div>
+                <div>
+                    <h3>Backend API</h3>
+                    <a href="/docs">https://okx-rwa-guardian.onrender.com</a>
+                </div>
+            </div>
+            <div class="live-item">
+                <div class="live-check">✓</div>
+                <div>
+                    <h3>Smart Contract (X Layer Testnet)</h3>
+                    <a href="https://www.okx.com/explorer/xlayer-test/address/0xbbAd97DabBa50807F38F9cF3812F2E7B1305b7E6" target="_blank">0xbbAd...b7E6</a>
+                </div>
+            </div>
+            <div class="live-item">
+                <div class="live-check">✓</div>
+                <div>
+                    <h3>OKX.AI Marketplace</h3>
+                    <span style="color: var(--text-secondary); font-size: 0.85rem;">Agent #6007 (ASP)</span>
+                </div>
+            </div>
+            <div class="live-item">
+                <div class="live-check">✓</div>
+                <div>
+                    <h3>Source Code</h3>
+                    <a href="https://github.com/ay-web3/okx-rwa-guardian" target="_blank">github.com/ay-web3/okx-rwa-guardian</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<footer>
+    <div class="container">
+        Built by <a href="https://github.com/ay-web3" target="_blank">@Ay-web3</a> for the OKX.AI Genesis Hackathon &nbsp;·&nbsp; MIT License
+    </div>
+</footer>
+
+</body>
+</html>

@@ -3,6 +3,7 @@ import os
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Header, HTTPException, Depends
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -127,6 +128,13 @@ app.add_middleware(
 # ──────────────────────────────────────────────
 # API Endpoints (unchanged interface for frontend)
 # ──────────────────────────────────────────────
+
+@app.get("/", response_class=HTMLResponse)
+async def landing_page():
+    """Serve the project landing page."""
+    import pathlib
+    html_path = pathlib.Path(__file__).parent / "landing.html"
+    return HTMLResponse(content=html_path.read_text(encoding="utf-8"), status_code=200)
 
 class SimulatePayload(BaseModel):
     type: str

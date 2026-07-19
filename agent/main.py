@@ -312,6 +312,17 @@ async def _evaluate_core(payload: DynamicEvaluatePayload):
     decision = final_validation.get("decision", "REJECTED")
     if decision == "APPROVED":
         await executor_agent.log("✅ Consensus APPROVED. Generating cryptographic signature for payload.", "dynamic_query")
+        
+        # Generate actual cryptographic signature
+        import json
+        from eth_account import Account
+        from eth_account.messages import encode_defunct
+        from web3_client import PRIVATE_KEY
+        
+        message = encode_defunct(text=json.dumps(verdict, sort_keys=True))
+        signed_message = Account.sign_message(message, private_key=PRIVATE_KEY)
+        verdict["signature"] = signed_message.signature.hex()
+        
         await executor_agent.log("Oracle payload returned successfully to client.", "dynamic_query")
     else:
         await executor_agent.log("⛔ Consensus REJECTED. Payload flagged as invalid.", "dynamic_query")

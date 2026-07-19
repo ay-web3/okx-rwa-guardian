@@ -138,14 +138,25 @@ app = FastAPI(
 )
 
 @app.get("/docs", include_in_schema=False)
-async def custom_swagger_ui_html():
-    return get_swagger_ui_html(
-        openapi_url=app.openapi_url,
-        title=app.title + " - API Docs",
-        oauth2_redirect_url=app.swagger_ui_oauth2_redirect_url,
-        swagger_js_url="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js",
-        swagger_css_url="https://cdn.jsdelivr.net/npm/swagger-ui-themes@3.0.0/themes/3.x/theme-material.css",
-    )
+async def scalar_html():
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>{app.title} - API Docs</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>
+            body {{ margin: 0; padding: 0; background-color: #0c0c14; }}
+        </style>
+    </head>
+    <body>
+        <script id="api-reference" data-url="/openapi.json" data-theme="moon"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(html)
 
 app.add_middleware(
     CORSMiddleware,

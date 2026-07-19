@@ -195,25 +195,35 @@ async def scalar_html():
         <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
         <script>
             let currentSize = 13; // Default Scalar font size
-            function zoomCode(direction) {{
+            function zoomCode(direction) {
                 currentSize += direction * 2;
                 if (currentSize < 10) currentSize = 10;
-                if (currentSize > 24) currentSize = 24;
+                if (currentSize > 32) currentSize = 32;
                 
                 document.documentElement.style.setProperty('--scalar-font-size-2', currentSize + 'px', 'important');
                 document.documentElement.style.setProperty('--scalar-font-size-3', currentSize + 'px', 'important');
                 document.documentElement.style.setProperty('--scalar-font-code', currentSize + 'px', 'important');
                 
-                // Force all pre/code blocks to take the new size
+                // Force all pre/code blocks and CodeMirror editors to take the new size
                 const styleId = 'zoom-style-override';
                 let style = document.getElementById(styleId);
-                if (!style) {{
+                if (!style) {
                     style = document.createElement('style');
                     style.id = styleId;
                     document.head.appendChild(style);
-                }}
-                style.innerHTML = `.scalar-api-client pre, .scalar-api-client code {{ font-size: ${{currentSize}}px !important; line-height: 1.8 !important; }}`;
-            }}
+                }
+                style.innerHTML = `
+                    .scalar-api-client pre, 
+                    .scalar-api-client code,
+                    .cm-editor,
+                    .cm-content,
+                    .cm-line,
+                    .cm-gutterElement { 
+                        font-size: ${currentSize}px !important; 
+                        line-height: 1.8 !important; 
+                    }
+                `;
+            }
         </script>
     </body>
     </html>

@@ -53,6 +53,38 @@ Traders pay us **0.10 USDC** to feed our risk assessments directly into their hi
 
 ---
 
+## 📡 Sample API Response
+
+🔗 **Live API:** [`https://okx-rwa-guardian.onrender.com`](https://okx-rwa-guardian.onrender.com)
+
+When a client pays **0.10 USDC** via nano-payment and queries our Decision Oracle, the API returns a structured, multi-dimensional risk assessment that protocols can consume directly — no additional AI processing needed:
+
+```json
+{
+  "physicalRisk": 74,
+  "economicRisk": 61,
+  "liquidityRisk": 49,
+  "overallRisk": 68,
+  "recommendedAction": "raiseCollateralRatio",
+  "confidence": 0.94,
+  "analysis": "Category 3 hurricane warning within 80km of asset. Local rental market showing 12% YoY decline. Combined physical and economic pressure warrants increased collateral requirements.",
+  "dissenting_factors": "Insurance costs remain stable; no regulatory changes detected.",
+  "signature": "0x3a8f...c4e1"
+}
+```
+
+### Action Space
+
+| Overall Risk | Recommended Action | Protocol Effect |
+|---|---|---|
+| 0–20 | `normal` | No action needed |
+| 21–50 | `increaseMonitoring` | Increase polling frequency |
+| 51–80 | `raiseCollateralRatio` | Increase collateral requirements |
+| 81–90 | `pauseNewBorrowing` | Halt new loan origination |
+| 91–100 | `freezeTransfers` | Emergency freeze all transfers |
+
+---
+
 ## 🚀 How to Run Locally
 
 ### Prerequisites
@@ -95,5 +127,13 @@ Click **"SIMULATE DISASTER"** to watch the multi-agent swarm detect the anomaly,
 The `RWAToken.sol` contract is currently deployed and verified on the **OKX X Layer Testnet**.
 * **Contract Address:** `0xbbAd97DabBa50807F38F9cF3812F2E7B1305b7E6`
 
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
 ## 🤝 Team
-*(Add your team names / Twitter handles here)*
+
+Built by [**@Ay-web3**](https://github.com/ay-web3) for the OKX.AI Genesis Hackathon.
+

@@ -251,6 +251,11 @@ async def landing_page():
 
 
 
+@app.get("/agent-logs")
+async def get_agent_logs(limit: int = 50):
+    """Returns recent inter-agent messages. Great for demonstrating the AI swarm's internal reasoning to hackathon judges."""
+    return bus.get_recent_logs(limit=limit)
+
 class DynamicEvaluatePayload(BaseModel):
     asset_name: str = "Miami Condo"
     lat: float = 25.79

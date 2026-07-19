@@ -688,11 +688,22 @@
 
         /* ── Responsive ── */
         @media (max-width: 768px) {
+            h1 { font-size: 2.4rem; }
+            .topbar span:last-child { display: none; } /* Hide long status text on small screens */
             .problem-grid, .pipeline, .compare-grid, .tech-list, .live-list { grid-template-columns: 1fr; }
             .pipe-arrow { display: none; }
-            .hero-stats { flex-direction: column; gap: 1.5rem; }
-            .action-row { grid-template-columns: 100px 1fr 1fr; }
-            .action-cell { padding: 0.7rem; font-size: 0.78rem; }
+            .hero-stats { flex-direction: column; gap: 1.5rem; align-items: center; text-align: center; }
+            .stat { text-align: center; }
+            .btn { width: 100%; justify-content: center; }
+            .hero-actions { flex-direction: column; width: 100%; }
+            
+            /* Convert Action Table to Stacked Cards for Mobile */
+            .action-row.header { display: none; }
+            .action-row { grid-template-columns: 1fr; padding: 1rem; gap: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.03); }
+            .action-cell { padding: 0; }
+            .action-cell:nth-child(1)::before { content: 'RISK TIER: '; font-size: 0.65rem; color: var(--text-dim); margin-right: 0.5rem; font-weight: 600; letter-spacing: 0.1em; }
+            .action-cell:nth-child(2)::before { content: 'ACTION: '; font-size: 0.65rem; color: var(--text-dim); margin-right: 0.5rem; font-weight: 600; letter-spacing: 0.1em; }
+            .action-cell:nth-child(3)::before { content: 'EFFECT: '; font-size: 0.65rem; color: var(--text-dim); margin-right: 0.5rem; font-weight: 600; letter-spacing: 0.1em; }
         }
     </style>
 </head>

@@ -148,11 +148,73 @@ async def scalar_html():
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <style>
             body {{ margin: 0; padding: 0; background-color: #0c0c14; }}
+            .zoom-controls {{
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: rgba(12, 12, 22, 0.9);
+                border: 1px solid rgba(0, 212, 255, 0.2);
+                border-radius: 8px;
+                display: flex;
+                gap: 8px;
+                padding: 8px;
+                z-index: 9999;
+                backdrop-filter: blur(10px);
+            }}
+            .zoom-btn {{
+                background: transparent;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                color: #c8c8d8;
+                width: 32px;
+                height: 32px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-family: monospace;
+                font-size: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s;
+            }}
+            .zoom-btn:hover {{
+                background: rgba(0, 212, 255, 0.1);
+                border-color: #00d4ff;
+                color: #00d4ff;
+            }}
+            /* Remove height limits on scalar response box so it doesn't scroll inside a small window */
+            .scalar-api-client__response {{ max-height: none !important; height: auto !important; }}
+            .scalar-api-client__response-body {{ max-height: none !important; height: auto !important; }}
         </style>
     </head>
     <body>
+        <div class="zoom-controls">
+            <button class="zoom-btn" onclick="zoomCode(1)" title="Zoom In">A+</button>
+            <button class="zoom-btn" onclick="zoomCode(-1)" title="Zoom Out">A-</button>
+        </div>
         <script id="api-reference" data-url="/openapi.json" data-theme="moon"></script>
         <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+        <script>
+            let currentSize = 13; // Default Scalar font size
+            function zoomCode(direction) {{
+                currentSize += direction * 2;
+                if (currentSize < 10) currentSize = 10;
+                if (currentSize > 24) currentSize = 24;
+                
+                document.documentElement.style.setProperty('--scalar-font-size-2', currentSize + 'px', 'important');
+                document.documentElement.style.setProperty('--scalar-font-size-3', currentSize + 'px', 'important');
+                document.documentElement.style.setProperty('--scalar-font-code', currentSize + 'px', 'important');
+                
+                // Force all pre/code blocks to take the new size
+                const styleId = 'zoom-style-override';
+                let style = document.getElementById(styleId);
+                if (!style) {{
+                    style = document.createElement('style');
+                    style.id = styleId;
+                    document.head.appendChild(style);
+                }}
+                style.innerHTML = `.scalar-api-client pre, .scalar-api-client code {{ font-size: ${{currentSize}}px !important; line-height: 1.8 !important; }}`;
+            }}
+        </script>
     </body>
     </html>
     """

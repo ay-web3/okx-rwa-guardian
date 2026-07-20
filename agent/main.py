@@ -372,11 +372,11 @@ async def evaluate_rwa_risk(payload: DynamicEvaluatePayload):
             verdict["overallRisk"] = mods["overallRisk"]
 
     # Since we are an API Oracle, the Executor merely signs the final verified payload
-    decision = final_validation.get("decision", "REJECTED")
+    decision = final_validation.get("decision", "OVERRULED")
     if decision == "APPROVED":
         await executor_agent.log("✅ Consensus APPROVED. Generating cryptographic signature for payload.", "dynamic_query")
     else:
-        await executor_agent.log("⛔ Consensus REJECTED. Overriding action to 'normal' and generating signature.", "dynamic_query")
+        await executor_agent.log("⛔ Consensus OVERRULED. Adjusting action and generating signature.", "dynamic_query")
     
     # ALWAYS Generate actual cryptographic signature for the final payload
     import json
@@ -390,14 +390,45 @@ async def evaluate_rwa_risk(payload: DynamicEvaluatePayload):
     
     await executor_agent.log("Oracle payload returned successfully to client.", "dynamic_query")
     
+    # ── Build the final response ──
+    # Determine the definitive action after the auditor's review
+    auditor_decision = final_validation.get("decision", "OVERRULED")
+    if auditor_decision == "APPROVED":
+        final_action = verdict.get("recommendedAction", "normal")
+    else:
+        # Auditor overruled: use the auditor's finalAction, fall back to modifications, then "hold"
+        final_action = (
+            final_validation.get("finalAction")
+            or mods.get("recommendedAction")
+            or "hold"
+        )
+    
+    # Map the final action to a human-readable risk level
+    action_to_risk_level = {
+        "normal": "LOW",
+        "hold": "LOW",
+        "increaseMonitoring": "MEDIUM",
+        "raiseCollateralRatio": "HIGH",
+        "pauseNewBorrowing": "CRITICAL",
+        "freezeTransfers": "EXTREME"
+    }
+    risk_level = action_to_risk_level.get(final_action, "MEDIUM")
+    
     result = {
         "status": "success",
         "asset": payload.asset_name,
         "location": {"lat": payload.lat, "lon": payload.lon},
-        "verdict": verdict,
-        "consensus": {
-            "decision": final_validation.get("decision"),
+        "finalVerdict": {
+            "action": final_action,
+            "riskLevel": risk_level,
+            "summary": final_validation.get("summary", "Assessment complete.")
+        },
+        "analyst": verdict,
+        "auditor": {
+            "decision": auditor_decision,
+            "finalAction": final_action,
             "risk_of_false_positive": final_validation.get("risk_of_false_positive"),
+            "reasoning": final_validation.get("reasoning", ""),
             "summary": final_validation.get("summary")
         }
     }

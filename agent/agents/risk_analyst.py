@@ -26,16 +26,21 @@ Consider:
     - Critical (81-90): "pauseNewBorrowing"
     - Extreme (91-100): "freezeTransfers"
 
+IMPORTANT — overallRisk MUST be computed as a weighted average, not a simple mean:
+  overallRisk = round(physicalRisk * 0.5 + economicRisk * 0.3 + liquidityRisk * 0.2)
+Always use these exact weights. Include a "riskWeights" key showing the weights used.
+
 Output a JSON object exactly like this:
 {
   "physicalRisk": <int 0-100>,
   "economicRisk": <int 0-100>,
   "liquidityRisk": <int 0-100>,
-  "overallRisk": <int 0-100>,
+  "overallRisk": <int 0-100, computed as physicalRisk*0.5 + economicRisk*0.3 + liquidityRisk*0.2>,
+  "riskWeights": {"physical": 0.5, "economic": 0.3, "liquidity": 0.2},
   "recommendedAction": "normal" | "increaseMonitoring" | "raiseCollateralRatio" | "pauseNewBorrowing" | "freezeTransfers",
   "confidence": <float 0.0-1.0, how confident you are in this verdict>,
   "analysis": "<detailed reasoning explaining your synthesis of all agent inputs>",
-  "dissenting_factors": "<any factors that argue AGAINST your verdict>"
+  "caveats": "<any factors that argue AGAINST your verdict — hedges, uncertainties, or mitigating circumstances>"
 }
 
 IMPORTANT: You are recommending, not executing. The Verification Agent will review your verdict before any on-chain action is taken. Be honest about uncertainty.
@@ -69,10 +74,11 @@ class RiskAnalystAgent(BaseAgent):
                 "economicRisk": 0,
                 "liquidityRisk": 0,
                 "overallRisk": 0,
+                "riskWeights": {"physical": 0.5, "economic": 0.3, "liquidity": 0.2},
                 "recommendedAction": "normal",
                 "confidence": 0.0,
                 "analysis": "No API key configured.",
-                "dissenting_factors": "N/A"
+                "caveats": "N/A"
             }
 
         try:
@@ -95,10 +101,11 @@ class RiskAnalystAgent(BaseAgent):
                 "economicRisk": 0,
                 "liquidityRisk": 0,
                 "overallRisk": 0,
+                "riskWeights": {"physical": 0.5, "economic": 0.3, "liquidity": 0.2},
                 "recommendedAction": "normal",
                 "confidence": 0.0,
                 "analysis": f"Synthesis error: {e}",
-                "dissenting_factors": "Analysis failed"
+                "caveats": "Analysis failed"
             }
 
     async def run(self):

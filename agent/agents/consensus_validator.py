@@ -24,16 +24,19 @@ Rules:
 - For PAUSE TRADING recommendations: You must see STRONG, CONFIRMED evidence. A single news headline is NOT enough. Require multiple sources or a genuine NOAA severe weather warning.
 - For yield adjustments: Be more lenient. Small adjustments based on moderate evidence are acceptable.
 - For health score changes: Be lenient. These are informational and don't affect the contract.
-- For "normal" actions (DO NOTHING): If the environment is safe, you MUST output "APPROVED". Only "REJECT" a normal action if you believe a severe risk was dangerously ignored.
+- For "normal" actions (DO NOTHING): If the environment is safe, you MUST output "APPROVED". Only overrule a normal action if you believe a severe risk was dangerously ignored.
+
+IMPORTANT: When you overrule the analyst, you MUST provide a "finalAction" — the action the protocol should take INSTEAD of the analyst's recommendation. The buyer should never be left without a clear next step.
 
 Output a JSON object:
 {
-  "decision": "APPROVED" | "REJECTED",
-  "reasoning": "<detailed explanation of why you approve or reject>",
+  "decision": "APPROVED" | "OVERRULED",
+  "reasoning": "<detailed explanation of why you approve or overrule the analyst's recommendation>",
   "modifications": {
     "recommendedAction": <string — your recommended override action, or null to keep original>,
     "overallRisk": <int — your adjusted score, or null to keep original>
   },
+  "finalAction": "<the definitive action the protocol should take after your review — always present>",
   "risk_of_false_positive": <float 0.0-1.0>,
   "summary": "<one sentence verdict>"
 }
@@ -67,6 +70,7 @@ class ConsensusValidatorAgent(BaseAgent):
                 "decision": "APPROVED",
                 "reasoning": "No API key — auto-approving.",
                 "modifications": {},
+                "finalAction": verdict.get("recommendedAction", "normal"),
                 "risk_of_false_positive": 0.5,
                 "summary": "Auto-approved (no validation API key)."
             }
@@ -91,9 +95,10 @@ class ConsensusValidatorAgent(BaseAgent):
         except Exception as e:
             logger.error(f"Consensus validation LLM failed: {e}")
             return {
-                "decision": "REJECTED" if verdict.get("recommendedAction") in ["pauseNewBorrowing", "freezeTransfers"] else "APPROVED",
-                "reasoning": f"Validation failed ({e}). Rejecting critical actions as a safety measure.",
+                "decision": "OVERRULED" if verdict.get("recommendedAction") in ["pauseNewBorrowing", "freezeTransfers"] else "APPROVED",
+                "reasoning": f"Validation failed ({e}). Overruling critical actions as a safety measure.",
                 "modifications": {"recommendedAction": "normal"},
+                "finalAction": "normal",
                 "risk_of_false_positive": 0.8,
                 "summary": "Validation error — critical actions blocked for safety."
             }
@@ -126,6 +131,7 @@ class ConsensusValidatorAgent(BaseAgent):
                         "decision": "APPROVED",
                         "reasoning": "Non-critical action auto-approved.",
                         "modifications": {},
+                        "finalAction": verdict.get("recommendedAction", "normal"),
                         "risk_of_false_positive": 0.0,
                         "summary": "Auto-approved (non-critical)."
                     }

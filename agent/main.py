@@ -122,7 +122,7 @@ description = """
 ### OKX.AI Marketplace
 - **Agent ID:** `#6007`
 - **Role:** `Agentic Service Provider (ASP)`
-- **Cost:** `0.10 USDC per query` (via OKX Agent Payments Protocol)
+- **Cost:** `0.05 USDT per query` (via OKX Agent Payments Protocol)
 
 ### Core Capabilities
 This API allows smart contracts and external Web3 agents to query real-time, multi-dimensional risk assessments for tokenized Real-World Assets. The 4-agent swarm automatically correlates NOAA weather alerts, USGS earthquake data, and Google News sentiment into actionable protocol decisions (e.g., `raiseCollateralRatio`).
@@ -280,7 +280,7 @@ async def verify_okx_nano_payment(x_okx_payment_signature: Optional[str] = Heade
     
     If no PAYMENT-SIGNATURE header is present, returns HTTP 402 with a 
     PAYMENT-REQUIRED header containing a base64-encoded JSON payload that
-    tells the calling agent how to pay (USDC on X Layer mainnet).
+    tells the calling agent how to pay (USDT on X Layer mainnet).
     
     If a PAYMENT-SIGNATURE header IS present, verifies it via the x402.org
     facilitator before allowing the request through.
@@ -297,11 +297,11 @@ async def verify_okx_nano_payment(x_okx_payment_signature: Optional[str] = Heade
             {
                 "scheme": "exact",
                 "network": "eip155:196",
-                "maxAmountRequired": "100000",
-                "asset": "0x74b7f16337b8972027f6196a17a631ac6de26d22",
+                "maxAmountRequired": "50000",
+                "asset": "0x1e4a5963abfd975d8c9021ce480b42188849d41d",
                 "payTo": "0x1fd66d9e94a16db5a55bc03400282484962e2e8b",
                 "extra": {
-                    "name": "USD Coin",
+                    "name": "Tether USD",
                     "version": "1"
                 }
             }
@@ -318,7 +318,7 @@ async def verify_okx_nano_payment(x_okx_payment_signature: Optional[str] = Heade
             detail={
                 "x402Version": 2,
                 "error": "Payment Required",
-                "description": "This endpoint requires a payment of 0.10 USDC on X Layer via the OKX Agent Payments Protocol. Use the PAYMENT-REQUIRED header value to sign a payment and replay with a PAYMENT-SIGNATURE header.",
+                "description": "This endpoint requires a payment of 0.05 USDT on X Layer via the OKX Agent Payments Protocol. Use the PAYMENT-REQUIRED header value to sign a payment and replay with a PAYMENT-SIGNATURE header.",
                 "accepts": X402_PAYMENT_CONFIG["accepts"]
             },
             headers={
@@ -443,7 +443,7 @@ async def _evaluate_core(payload: DynamicEvaluatePayload):
 async def evaluate_rwa_risk(payload: DynamicEvaluatePayload, payment_verified = Depends(verify_okx_nano_payment)):
     """
     MCP-Compliant Agentic Service Provider endpoint (Oracle Mode).
-    Requires payment of 0.10 USDC on X Layer mainnet via the OKX Agent Payments Protocol (x402 v2).
+    Requires payment of 0.05 USDT on X Layer mainnet via the OKX Agent Payments Protocol (x402 v2).
     """
     import base64
     import json as json_mod
@@ -457,8 +457,8 @@ async def evaluate_rwa_risk(payload: DynamicEvaluatePayload, payment_verified = 
         "status": "settled",
         "scheme": "exact",
         "network": "eip155:196",
-        "amount": "100000",
-        "asset": "0x74b7f16337b8972027f6196a17a631ac6de26d22",
+        "amount": "50000",
+        "asset": "0x1e4a5963abfd975d8c9021ce480b42188849d41d",
         "payer": payment_verified.get("payer", "unknown") if isinstance(payment_verified, dict) else "verified"
     }
     payment_response_b64 = base64.b64encode(

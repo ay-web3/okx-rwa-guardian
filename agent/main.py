@@ -324,10 +324,6 @@ try:
         resource_server=resource_server,
         route_config=route_config
     )
-except Exception as e:
-    logger.warning(f"okxweb3-app-x402 SDK error or missing API keys: {e}")
-    def dummy_dependency(): pass
-    x402_dependency = dummy_dependency
 
 
 @app.post("/evaluate_rwa_risk", dependencies=[Depends(x402_dependency)])

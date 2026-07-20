@@ -298,7 +298,7 @@ async def verify_okx_nano_payment(x_okx_payment_signature: Optional[str] = Heade
                 "scheme": "exact",
                 "network": "eip155:196",
                 "maxAmountRequired": "50000",
-                "asset": "0x1e4a5963abfd975d8c9021ce480b42188849d41d",
+                "asset": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
                 "payTo": "0x1fd66d9e94a16db5a55bc03400282484962e2e8b",
                 "extra": {
                     "name": "Tether USD",
@@ -458,7 +458,7 @@ async def evaluate_rwa_risk(payload: DynamicEvaluatePayload, payment_verified = 
         "scheme": "exact",
         "network": "eip155:196",
         "amount": "50000",
-        "asset": "0x1e4a5963abfd975d8c9021ce480b42188849d41d",
+        "asset": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
         "payer": payment_verified.get("payer", "unknown") if isinstance(payment_verified, dict) else "verified"
     }
     payment_response_b64 = base64.b64encode(

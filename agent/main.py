@@ -340,7 +340,7 @@ async def verify_okx_nano_payment(payment_signature: Optional[str] = Header(None
             verify_response = await client.post(
                 FACILITATOR_URL,
                 json={
-                    "paymentPayload": decoded_payload,
+                    "paymentPayload": payment_signature,
                     "paymentRequirements": X402_PAYMENT_CONFIG["accepts"][0],
                     "resource": X402_PAYMENT_CONFIG["resource"]
                 }

@@ -333,6 +333,7 @@ async def verify_x402_payment(payment_signature: Optional[str] = Header(None, al
             verify_response = await client.post(
                 FACILITATOR_URL,
                 json={
+                    "x402Version": 2,
                     "paymentPayload": payment_signature,
                     "paymentRequirements": X402_PAYMENT_CONFIG["accepts"][0],
                     "resource": X402_PAYMENT_CONFIG["resource"]

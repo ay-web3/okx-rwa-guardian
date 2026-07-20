@@ -314,8 +314,8 @@ try:
     
     # Create the FastAPI dependency
     x402_dependency = payment_middleware(
-        resource_server=resource_server,
-        route_config=route_config
+        server=resource_server,
+        routes=route_config
     )
 except Exception as e:
     raise RuntimeError(f"Failed to initialize OKX SDK: {e}")

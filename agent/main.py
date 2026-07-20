@@ -275,111 +275,60 @@ class DynamicEvaluatePayload(BaseModel):
     lon: float = -80.13
 
 # ──────────────────────────────────────────────
-# x402 Payment Gatekeeper Configuration (Open-Source)
+# x402 Payment Middleware Configuration
 # ──────────────────────────────────────────────
-from fastapi import Header, HTTPException, Depends
-from typing import Optional
-import base64
-import json as json_mod
-import httpx
+from fastapi import Depends
+try:
+    from x402 import x402ResourceServer
+    from x402.http import OKXFacilitatorClient, OKXFacilitatorConfig, OKXAuthConfig, PaymentOption, RouteConfig
+    from x402.http.middleware.fastapi import payment_middleware
+    from x402.mechanisms.evm.exact.server import ExactEvmScheme
+    from x402.schemas import AssetAmount
 
-async def verify_x402_payment(payment_signature: Optional[str] = Header(None, alias="PAYMENT-SIGNATURE")):
-    """
-    Standard open-source x402 v2 payment gatekeeper.
-    Requires NO OKX API keys or exchange credentials.
-    """
-    # ── x402 Payment Requirements (USDT on X Layer mainnet) ──
-    X402_PAYMENT_CONFIG = {
-        "x402Version": 2,
-        "resource": "/evaluate_rwa_risk",
-        "accepts": [
-            {
-                "scheme": "exact",
-                "network": "eip155:196",
-                "maxAmountRequired": "50000",
-                "asset": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-                "payTo": "0x1fd66d9e94a16db5a55bc03400282484962e2e8b",
-                "extra": {
-                    "name": "Tether USD",
-                    "version": "1"
-                }
-            }
-        ]
-    }
-
-    # ── Step 1: Issue 402 Challenge if signature is missing ──
-    if not payment_signature or payment_signature in ("undefined", "null"):
-        payload_json = json_mod.dumps(X402_PAYMENT_CONFIG, separators=(',', ':'))
-        payload_b64 = base64.b64encode(payload_json.encode()).decode()
-
-        raise HTTPException(
-            status_code=402,
-            detail={
-                "x402Version": 2,
-                "error": "Payment Required",
-                "description": "This endpoint requires a payment of 0.05 USDT on X Layer via x402.",
-                "accepts": X402_PAYMENT_CONFIG["accepts"]
-            },
-            headers={
-                "PAYMENT-REQUIRED": payload_b64
-            }
-        )
-
-    # ── Step 2: Verify payment via public open-source facilitator ──
-    FACILITATOR_URL = "https://x402.org/facilitator/verify"
+    # 1. Configure the OKX API Auth for the Facilitator
+    # We use .strip() to remove any accidental spaces or quotes copied into Render
+    auth_config = OKXAuthConfig(
+        api_key=os.getenv("OKX_API_KEY", "").strip(' \'"\n\r\t'),
+        secret_key=os.getenv("OKX_SECRET_KEY", "").strip(' \'"\n\r\t'),
+        passphrase=os.getenv("OKX_PASSPHRASE", "").strip(' \'"\n\r\t')
+    )
     
-    # Decode base64 signature to JSON dictionary for the public facilitator
-    try:
-        # Add padding just in case
-        padded_signature = payment_signature + "=" * ((4 - len(payment_signature) % 4) % 4)
-        # Use urlsafe to handle both standard and url-safe base64 alphabets
-        decoded_bytes = base64.urlsafe_b64decode(padded_signature)
-        payment_payload_dict = json_mod.loads(decoded_bytes.decode("utf-8"))
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Invalid payment signature format: {str(e)}")
-
-    try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            verify_response = await client.post(
-                FACILITATOR_URL,
-                json={
-                    "paymentPayload": payment_payload_dict,
-                    "paymentRequirements": X402_PAYMENT_CONFIG["accepts"][0],
-                    "resource": X402_PAYMENT_CONFIG["resource"]
-                }
-            )
-        
-        if verify_response.status_code == 200 and not "No facilitator registered" in verify_response.text:
-            result = verify_response.json()
-            if result.get("valid") or result.get("isValid"):
-                return result
-            else:
-                raise HTTPException(
-                    status_code=402,
-                    detail=f"Payment signature invalid: {result.get('reason', 'Facilitator rejected signature.')}"
+    # 2. Initialize the Facilitator and Resource Server
+    facilitator_client = OKXFacilitatorClient(OKXFacilitatorConfig(auth=auth_config))
+    resource_server = x402ResourceServer(facilitator_clients=[facilitator_client])
+    resource_server.register("eip155:196", ExactEvmScheme())
+    
+    route_config = {
+        "POST /evaluate_rwa_risk": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    network="eip155:196",
+                    price=AssetAmount(amount="50000", asset="0x779Ded0c9e1022225f8E0630b35a9b54bE713736"),
+                    pay_to="0x1fd66d9e94a16db5a55bc03400282484962e2e8b",
+                    extra={"name": "Tether USD", "version": "1"}
                 )
-        elif "No facilitator registered" in verify_response.text:
-            # x402.org lacks X Layer support; fallback to lightweight local verification
-            if payment_payload_dict.get("payload", {}).get("signature"):
-                return {"valid": True, "payer": payment_payload_dict.get("payload", {}).get("authorization", {}).get("from", "verified")}
-            else:
-                raise HTTPException(status_code=402, detail="Local Verification: Missing signature payload.")
-        else:
-            raise HTTPException(
-                status_code=402,
-                detail=f"Facilitator verification failed: {verify_response.text}"
-            )
-            
-    except httpx.TimeoutException:
-        raise HTTPException(status_code=504, detail="Payment verification timed out.")
-    except httpx.ConnectError:
-        raise HTTPException(status_code=502, detail="Payment facilitator is unreachable.")
+            ],
+            resource="/evaluate_rwa_risk"
+        )
+    }
+    
+    # Add the FastAPI middleware
+    from x402.http.middleware.fastapi import PaymentMiddlewareASGI
+    app.add_middleware(
+        PaymentMiddlewareASGI,
+        server=resource_server,
+        routes=route_config
+    )
+except Exception as e:
+    raise RuntimeError(f"Failed to initialize OKX SDK: {e}")
 
 
 @app.post("/evaluate_rwa_risk")
-async def evaluate_rwa_risk(payload: DynamicEvaluatePayload, payment_verified = Depends(verify_x402_payment)):
+async def evaluate_rwa_risk(payload: DynamicEvaluatePayload):
     """
-    Agentic Service Provider endpoint secured via open-source x402.
+    MCP-Compliant Agentic Service Provider endpoint (Oracle Mode).
+    Requires payment of 0.05 USDT on X Layer mainnet via the OKX Agent Payments Protocol (x402 v2).
     """
     logger.info(f"ASP Request received: Evaluating {payload.asset_name} at {payload.lat},{payload.lon}")
 
@@ -453,24 +402,9 @@ async def evaluate_rwa_risk(payload: DynamicEvaluatePayload, payment_verified = 
         }
     }
     
-    # Build settlement receipt header
-    payment_response = {
-        "status": "settled",
-        "scheme": "exact",
-        "network": "eip155:196",
-        "amount": "50000",
-        "asset": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-        "payer": payment_verified.get("payer", "verified") if isinstance(payment_verified, dict) else "verified"
-    }
-    payment_response_b64 = base64.b64encode(
-        json_mod.dumps(payment_response, separators=(',', ':')).encode()
-    ).decode()
-
-    from fastapi.responses import JSONResponse
-    return JSONResponse(
-        content=result,
-        headers={"PAYMENT-RESPONSE": payment_response_b64}
-    )
+    # The SDK's payment_middleware automatically handles injecting the PAYMENT-RESPONSE header
+    # and communicating with the OKX facilitator. We just return the core business result!
+    return result
 
 
 

@@ -350,21 +350,26 @@ async def verify_okx_nano_payment(payment_signature: Optional[str] = Header(None
                     status_code=402,
                     detail=f"Payment signature invalid: {result.get('reason', 'Facilitator rejected the signature.')}"
                 )
+        elif verify_response.status_code >= 400 and verify_response.status_code < 500:
+            # Facilitator explicitly rejected the payload (e.g. malformed signature)
+            raise HTTPException(
+                status_code=402,
+                detail=f"Invalid payment signature format: {verify_response.text}"
+            )
         else:
-            # Facilitator returned an error — log it and still accept the payment
-            # This prevents the service from going down if the facilitator is temporarily unavailable
-            logger.warning(f"Facilitator returned {verify_response.status_code}: {verify_response.text}")
-            logger.info(f"Accepting payment signature despite facilitator error (signature: {payment_signature[:20]}...)")
-            return True
+            # Facilitator returned a 5xx error
+            logger.error(f"Facilitator returned {verify_response.status_code}: {verify_response.text}")
+            raise HTTPException(
+                status_code=502,
+                detail="Payment facilitator is temporarily unavailable."
+            )
             
     except httpx.TimeoutException:
-        # Facilitator timeout — gracefully accept the payment to avoid service disruption
-        logger.warning("Facilitator verification timed out. Accepting payment signature.")
-        return True
+        logger.error("Facilitator verification timed out.")
+        raise HTTPException(status_code=504, detail="Payment verification timed out.")
     except httpx.ConnectError:
-        # Facilitator unreachable — gracefully accept
-        logger.warning("Facilitator unreachable. Accepting payment signature.")
-        return True
+        logger.error("Facilitator unreachable.")
+        raise HTTPException(status_code=502, detail="Payment facilitator is unreachable.")
 
 async def _evaluate_core(payload: DynamicEvaluatePayload):
     """Core evaluation logic decoupled from the endpoint."""

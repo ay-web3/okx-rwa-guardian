@@ -330,9 +330,13 @@ async def verify_x402_payment(payment_signature: Optional[str] = Header(None, al
     
     # Decode base64 signature to JSON dictionary for the public facilitator
     try:
-        payment_payload_dict = json_mod.loads(base64.b64decode(payment_signature).decode())
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid payment signature format")
+        # Add padding just in case
+        padded_signature = payment_signature + "=" * ((4 - len(payment_signature) % 4) % 4)
+        # Use urlsafe to handle both standard and url-safe base64 alphabets
+        decoded_bytes = base64.urlsafe_b64decode(padded_signature)
+        payment_payload_dict = json_mod.loads(decoded_bytes.decode("utf-8"))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid payment signature format: {str(e)}")
 
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:

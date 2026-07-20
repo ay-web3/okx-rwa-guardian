@@ -308,7 +308,7 @@ async def verify_x402_payment(payment_signature: Optional[str] = Header(None, al
     }
 
     # ── Step 1: Issue 402 Challenge if signature is missing ──
-    if not payment_signature:
+    if not payment_signature or payment_signature in ("undefined", "null"):
         payload_json = json_mod.dumps(X402_PAYMENT_CONFIG, separators=(',', ':'))
         payload_b64 = base64.b64encode(payload_json.encode()).decode()
 

@@ -274,7 +274,7 @@ class DynamicEvaluatePayload(BaseModel):
     lat: float = 25.79
     lon: float = -80.13
 
-async def verify_okx_nano_payment(x_okx_payment_signature: Optional[str] = Header(None)):
+async def verify_okx_nano_payment(payment_signature: Optional[str] = Header(None)):
     """
     OKX Agent Payments Protocol (x402 v2) Gatekeeper.
     
@@ -309,7 +309,7 @@ async def verify_okx_nano_payment(x_okx_payment_signature: Optional[str] = Heade
     }
 
     # ── Step 1: No payment header → issue x402 challenge ──
-    if not x_okx_payment_signature:
+    if not payment_signature:
         payload_json = json_mod.dumps(X402_PAYMENT_CONFIG, separators=(',', ':'))
         payload_b64 = base64.b64encode(payload_json.encode()).decode()
 
@@ -334,7 +334,7 @@ async def verify_okx_nano_payment(x_okx_payment_signature: Optional[str] = Heade
             verify_response = await client.post(
                 FACILITATOR_URL,
                 json={
-                    "paymentSignature": x_okx_payment_signature,
+                    "paymentSignature": payment_signature,
                     "paymentRequirements": X402_PAYMENT_CONFIG["accepts"][0],
                     "resource": X402_PAYMENT_CONFIG["resource"]
                 }
@@ -354,7 +354,7 @@ async def verify_okx_nano_payment(x_okx_payment_signature: Optional[str] = Heade
             # Facilitator returned an error — log it and still accept the payment
             # This prevents the service from going down if the facilitator is temporarily unavailable
             logger.warning(f"Facilitator returned {verify_response.status_code}: {verify_response.text}")
-            logger.info(f"Accepting payment signature despite facilitator error (signature: {x_okx_payment_signature[:20]}...)")
+            logger.info(f"Accepting payment signature despite facilitator error (signature: {payment_signature[:20]}...)")
             return True
             
     except httpx.TimeoutException:

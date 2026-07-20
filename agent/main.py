@@ -280,9 +280,18 @@ class DynamicEvaluatePayload(BaseModel):
 from fastapi import Depends
 try:
     from x402 import x402ResourceServer
-    from x402.http import OKXFacilitatorClient, OKXFacilitatorConfig, OKXAuthConfig
+    from x402.http import OKXFacilitatorClient, OKXFacilitatorConfig, OKXAuthConfig, PaymentOption, RouteConfig
     from x402.http.middleware.fastapi import payment_middleware
     from x402.mechanisms.evm.exact.server import ExactEvmScheme
+
+    # Try to import Price, if it exists, otherwise use a fallback or dict
+    try:
+        from x402 import Price
+    except ImportError:
+        try:
+            from x402.http import Price
+        except ImportError:
+            Price = lambda amount, asset: {"amount": amount, "asset": asset}
 
     # 1. Configure the OKX API Auth for the Facilitator
     auth_config = OKXAuthConfig(
@@ -294,23 +303,29 @@ try:
     # 2. Initialize the Facilitator and Resource Server
     facilitator_client = OKXFacilitatorClient(OKXFacilitatorConfig(auth=auth_config))
     resource_server = x402ResourceServer(facilitator_clients=[facilitator_client])
+    resource_server.register("eip155:196", ExactEvmScheme())
     
     # 3. Define the payment requirement (0.05 USDT on X Layer)
-    x402_scheme = ExactEvmScheme(
-        network="eip155:196",
-        asset="0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-        payTo="0x1fd66d9e94a16db5a55bc03400282484962e2e8b",
-        maxAmountRequired="50000"
+    route_config = RouteConfig(
+        accepts=[
+            PaymentOption(
+                scheme="exact",
+                network="eip155:196",
+                price=Price(amount="50000", asset="0x779Ded0c9e1022225f8E0630b35a9b54bE713736"),
+                pay_to="0x1fd66d9e94a16db5a55bc03400282484962e2e8b",
+                extra={"name": "Tether USD", "version": "1"}
+            )
+        ],
+        resource="/evaluate_rwa_risk"
     )
     
     # Create the FastAPI dependency
     x402_dependency = payment_middleware(
         resource_server=resource_server,
-        mechanisms=[x402_scheme],
-        resource="/evaluate_rwa_risk"
+        route_config=route_config
     )
-except ImportError:
-    logger.warning("okxweb3-app-x402 SDK not installed. Payment verification disabled.")
+except Exception as e:
+    logger.warning(f"okxweb3-app-x402 SDK error or missing API keys: {e}")
     def dummy_dependency(): pass
     x402_dependency = dummy_dependency
 

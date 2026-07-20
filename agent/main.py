@@ -284,14 +284,7 @@ try:
     from x402.http.middleware.fastapi import payment_middleware
     from x402.mechanisms.evm.exact.server import ExactEvmScheme
 
-    # Try to import Price, if it exists, otherwise use a fallback or dict
-    try:
-        from x402 import Price
-    except ImportError:
-        try:
-            from x402.http import Price
-        except ImportError:
-            Price = lambda amount, asset: {"amount": amount, "asset": asset}
+
 
     # 1. Configure the OKX API Auth for the Facilitator
     auth_config = OKXAuthConfig(
@@ -311,7 +304,7 @@ try:
             PaymentOption(
                 scheme="exact",
                 network="eip155:196",
-                price=Price(amount="50000", asset="0x779Ded0c9e1022225f8E0630b35a9b54bE713736"),
+                price={"amount": "50000", "asset": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736"},
                 pay_to="0x1fd66d9e94a16db5a55bc03400282484962e2e8b",
                 extra={"name": "Tether USD", "version": "1"}
             )

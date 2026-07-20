@@ -274,112 +274,55 @@ class DynamicEvaluatePayload(BaseModel):
     lat: float = 25.79
     lon: float = -80.13
 
-async def verify_okx_nano_payment(payment_signature: Optional[str] = Header(None)):
+# ──────────────────────────────────────────────
+# x402 Payment Middleware Configuration
+# ──────────────────────────────────────────────
+from fastapi import Depends
+try:
+    from x402 import x402ResourceServer
+    from x402.http import OKXFacilitatorClient, OKXFacilitatorConfig, OKXAuthConfig
+    from x402.http.middleware.fastapi import payment_middleware
+    from x402.mechanisms.evm.exact.server import ExactEvmScheme
+
+    # 1. Configure the OKX API Auth for the Facilitator
+    auth_config = OKXAuthConfig(
+        api_key=os.getenv("OKX_API_KEY", ""),
+        secret_key=os.getenv("OKX_SECRET_KEY", ""),
+        passphrase=os.getenv("OKX_PASSPHRASE", "")
+    )
+    
+    # 2. Initialize the Facilitator and Resource Server
+    facilitator_client = OKXFacilitatorClient(OKXFacilitatorConfig(auth=auth_config))
+    resource_server = x402ResourceServer(facilitator_clients=[facilitator_client])
+    
+    # 3. Define the payment requirement (0.05 USDT on X Layer)
+    x402_scheme = ExactEvmScheme(
+        network="eip155:196",
+        asset="0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
+        payTo="0x1fd66d9e94a16db5a55bc03400282484962e2e8b",
+        maxAmountRequired="50000"
+    )
+    
+    # Create the FastAPI dependency
+    x402_dependency = payment_middleware(
+        resource_server=resource_server,
+        mechanisms=[x402_scheme],
+        resource="/evaluate_rwa_risk"
+    )
+except ImportError:
+    logger.warning("okxweb3-app-x402 SDK not installed. Payment verification disabled.")
+    def dummy_dependency(): pass
+    x402_dependency = dummy_dependency
+
+
+@app.post("/evaluate_rwa_risk", dependencies=[Depends(x402_dependency)])
+async def evaluate_rwa_risk(payload: DynamicEvaluatePayload):
     """
-    OKX Agent Payments Protocol (x402 v2) Gatekeeper.
-    
-    If no PAYMENT-SIGNATURE header is present, returns HTTP 402 with a 
-    PAYMENT-REQUIRED header containing a base64-encoded JSON payload that
-    tells the calling agent how to pay (USDT on X Layer mainnet).
-    
-    If a PAYMENT-SIGNATURE header IS present, verifies it via the x402.org
-    facilitator before allowing the request through.
+    MCP-Compliant Agentic Service Provider endpoint (Oracle Mode).
+    Requires payment of 0.05 USDT on X Layer mainnet via the OKX Agent Payments Protocol (x402 v2).
     """
-    import base64
-    import json as json_mod
-    import httpx
+    logger.info(f"ASP Request received: Evaluating {payload.asset_name} at {payload.lat},{payload.lon}")
 
-    # ── x402 Payment Configuration ──
-    X402_PAYMENT_CONFIG = {
-        "x402Version": 2,
-        "resource": "/evaluate_rwa_risk",
-        "accepts": [
-            {
-                "scheme": "exact",
-                "network": "eip155:196",
-                "maxAmountRequired": "50000",
-                "asset": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-                "payTo": "0x1fd66d9e94a16db5a55bc03400282484962e2e8b",
-                "extra": {
-                    "name": "Tether USD",
-                    "version": "1"
-                }
-            }
-        ]
-    }
-
-    # ── Step 1: No payment header → issue x402 challenge ──
-    if not payment_signature:
-        payload_json = json_mod.dumps(X402_PAYMENT_CONFIG, separators=(',', ':'))
-        payload_b64 = base64.b64encode(payload_json.encode()).decode()
-
-        raise HTTPException(
-            status_code=402,
-            detail={
-                "x402Version": 2,
-                "error": "Payment Required",
-                "description": "This endpoint requires a payment of 0.05 USDT on X Layer via the OKX Agent Payments Protocol. Use the PAYMENT-REQUIRED header value to sign a payment and replay with a PAYMENT-SIGNATURE header.",
-                "accepts": X402_PAYMENT_CONFIG["accepts"]
-            },
-            headers={
-                "PAYMENT-REQUIRED": payload_b64
-            }
-        )
-
-    # ── Step 2: Payment header present → verify via facilitator ──
-    FACILITATOR_URL = "https://x402.org/facilitator/verify"
-    
-    try:
-        try:
-            # Decode the base64 payload from the client into a JSON object
-            decoded_payload = json_mod.loads(base64.b64decode(payment_signature).decode('utf-8'))
-        except Exception:
-            raise HTTPException(status_code=402, detail="Invalid payment signature encoding. Must be base64 JSON.")
-            
-        async with httpx.AsyncClient(timeout=15.0) as client:
-            verify_response = await client.post(
-                FACILITATOR_URL,
-                json={
-                    "paymentPayload": payment_signature,
-                    "paymentRequirements": X402_PAYMENT_CONFIG["accepts"][0],
-                    "resource": X402_PAYMENT_CONFIG["resource"]
-                }
-            )
-        
-        if verify_response.status_code == 200:
-            result = verify_response.json()
-            if result.get("valid") or result.get("isValid"):
-                logger.info(f"x402 payment verified! Payer: {result.get('payer', 'unknown')}")
-                return result
-            else:
-                raise HTTPException(
-                    status_code=402,
-                    detail=f"Payment signature invalid: {result.get('reason', 'Facilitator rejected the signature.')}"
-                )
-        elif verify_response.status_code >= 400 and verify_response.status_code < 500:
-            # Facilitator explicitly rejected the payload (e.g. malformed signature)
-            raise HTTPException(
-                status_code=402,
-                detail=f"Invalid payment signature format: {verify_response.text}"
-            )
-        else:
-            # Facilitator returned a 5xx error
-            logger.error(f"Facilitator returned {verify_response.status_code}: {verify_response.text}")
-            raise HTTPException(
-                status_code=502,
-                detail="Payment facilitator is temporarily unavailable."
-            )
-            
-    except httpx.TimeoutException:
-        logger.error("Facilitator verification timed out.")
-        raise HTTPException(status_code=504, detail="Payment verification timed out.")
-    except httpx.ConnectError:
-        logger.error("Facilitator unreachable.")
-        raise HTTPException(status_code=502, detail="Payment facilitator is unreachable.")
-
-async def _evaluate_core(payload: DynamicEvaluatePayload):
-    """Core evaluation logic decoupled from the endpoint."""
-    
     # Broadcast to the frontend terminal that the API Oracle was triggered
     await weather_agent.log(f"API Request Received. Initializing Swarm for {payload.asset_name} ({payload.lat}, {payload.lon})...", "dynamic_query")
     
@@ -438,7 +381,7 @@ async def _evaluate_core(payload: DynamicEvaluatePayload):
     
     await executor_agent.log("Oracle payload returned successfully to client.", "dynamic_query")
     
-    return {
+    result = {
         "status": "success",
         "asset": payload.asset_name,
         "location": {"lat": payload.lat, "lon": payload.lon},
@@ -449,37 +392,10 @@ async def _evaluate_core(payload: DynamicEvaluatePayload):
             "summary": final_validation.get("summary")
         }
     }
-
-@app.post("/evaluate_rwa_risk")
-async def evaluate_rwa_risk(payload: DynamicEvaluatePayload, payment_verified = Depends(verify_okx_nano_payment)):
-    """
-    MCP-Compliant Agentic Service Provider endpoint (Oracle Mode).
-    Requires payment of 0.05 USDT on X Layer mainnet via the OKX Agent Payments Protocol (x402 v2).
-    """
-    import base64
-    import json as json_mod
-    from fastapi.responses import JSONResponse
-
-    logger.info(f"ASP Request received: Evaluating {payload.asset_name} at {payload.lat},{payload.lon}")
-    result = await _evaluate_core(payload)
     
-    # Build PAYMENT-RESPONSE header with settlement receipt
-    payment_response = {
-        "status": "settled",
-        "scheme": "exact",
-        "network": "eip155:196",
-        "amount": "50000",
-        "asset": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736",
-        "payer": payment_verified.get("payer", "unknown") if isinstance(payment_verified, dict) else "verified"
-    }
-    payment_response_b64 = base64.b64encode(
-        json_mod.dumps(payment_response, separators=(',', ':')).encode()
-    ).decode()
-
-    return JSONResponse(
-        content=result,
-        headers={"PAYMENT-RESPONSE": payment_response_b64}
-    )
+    # The SDK's payment_middleware automatically handles injecting the PAYMENT-RESPONSE header
+    # and communicating with the OKX facilitator. We just return the core business result!
+    return result
 
 
 

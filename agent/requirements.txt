@@ -5,3 +5,4 @@ web3
 openai
 python-dotenv
 pydantic
+okxweb3-app-x402

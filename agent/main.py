@@ -298,19 +298,20 @@ try:
     resource_server = x402ResourceServer(facilitator_clients=[facilitator_client])
     resource_server.register("eip155:196", ExactEvmScheme())
     
-    # 3. Define the payment requirement (0.05 USDT on X Layer)
-    route_config = RouteConfig(
-        accepts=[
-            PaymentOption(
-                scheme="exact",
-                network="eip155:196",
-                price={"amount": "50000", "asset": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736"},
-                pay_to="0x1fd66d9e94a16db5a55bc03400282484962e2e8b",
-                extra={"name": "Tether USD", "version": "1"}
-            )
-        ],
-        resource="/evaluate_rwa_risk"
-    )
+    route_config = {
+        "POST /evaluate_rwa_risk": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    network="eip155:196",
+                    price={"amount": "50000", "asset": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736"},
+                    pay_to="0x1fd66d9e94a16db5a55bc03400282484962e2e8b",
+                    extra={"name": "Tether USD", "version": "1"}
+                )
+            ],
+            resource="/evaluate_rwa_risk"
+        )
+    }
     
     # Create the FastAPI dependency
     x402_dependency = payment_middleware(

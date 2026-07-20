@@ -324,6 +324,8 @@ try:
         resource_server=resource_server,
         route_config=route_config
     )
+except Exception as e:
+    raise RuntimeError(f"Failed to initialize OKX SDK: {e}")
 
 
 @app.post("/evaluate_rwa_risk", dependencies=[Depends(x402_dependency)])

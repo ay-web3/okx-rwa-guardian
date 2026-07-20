@@ -296,14 +296,14 @@ try:
     # 2. Initialize the Facilitator and Resource Server
     facilitator_client = OKXFacilitatorClient(OKXFacilitatorConfig(auth=auth_config))
     resource_server = x402ResourceServer(facilitator_clients=[facilitator_client])
-    resource_server.register("eip155:196", ExactEvmScheme())
+    resource_server.register("eip155:195", ExactEvmScheme())
     
     route_config = {
         "POST /evaluate_rwa_risk": RouteConfig(
             accepts=[
                 PaymentOption(
                     scheme="exact",
-                    network="eip155:196",
+                    network="eip155:195",
                     price={"amount": "50000", "asset": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736"},
                     pay_to="0x1fd66d9e94a16db5a55bc03400282484962e2e8b",
                     extra={"name": "Tether USD", "version": "1"}

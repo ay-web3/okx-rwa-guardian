@@ -313,8 +313,10 @@ try:
         )
     }
     
-    # Create the FastAPI dependency
-    x402_dependency = payment_middleware(
+    # Add the FastAPI middleware
+    from x402.http.middleware.fastapi import PaymentMiddlewareASGI
+    app.add_middleware(
+        PaymentMiddlewareASGI,
         server=resource_server,
         routes=route_config
     )
@@ -322,7 +324,7 @@ except Exception as e:
     raise RuntimeError(f"Failed to initialize OKX SDK: {e}")
 
 
-@app.post("/evaluate_rwa_risk", dependencies=[Depends(x402_dependency)])
+@app.post("/evaluate_rwa_risk")
 async def evaluate_rwa_risk(payload: DynamicEvaluatePayload):
     """
     MCP-Compliant Agentic Service Provider endpoint (Oracle Mode).

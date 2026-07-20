@@ -330,11 +330,17 @@ async def verify_okx_nano_payment(payment_signature: Optional[str] = Header(None
     FACILITATOR_URL = "https://x402.org/facilitator/verify"
     
     try:
+        try:
+            # Decode the base64 payload from the client into a JSON object
+            decoded_payload = json_mod.loads(base64.b64decode(payment_signature).decode('utf-8'))
+        except Exception:
+            raise HTTPException(status_code=402, detail="Invalid payment signature encoding. Must be base64 JSON.")
+            
         async with httpx.AsyncClient(timeout=15.0) as client:
             verify_response = await client.post(
                 FACILITATOR_URL,
                 json={
-                    "paymentPayload": payment_signature,
+                    "paymentPayload": decoded_payload,
                     "paymentRequirements": X402_PAYMENT_CONFIG["accepts"][0],
                     "resource": X402_PAYMENT_CONFIG["resource"]
                 }

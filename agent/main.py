@@ -283,28 +283,28 @@ try:
     from x402.http import OKXFacilitatorClient, OKXFacilitatorConfig, OKXAuthConfig, PaymentOption, RouteConfig
     from x402.http.middleware.fastapi import payment_middleware
     from x402.mechanisms.evm.exact.server import ExactEvmScheme
-
-
+    from x402.schemas import AssetAmount
 
     # 1. Configure the OKX API Auth for the Facilitator
+    # We use .strip() to remove any accidental spaces or quotes copied into Render
     auth_config = OKXAuthConfig(
-        api_key=os.getenv("OKX_API_KEY", ""),
-        secret_key=os.getenv("OKX_SECRET_KEY", ""),
-        passphrase=os.getenv("OKX_PASSPHRASE", "")
+        api_key=os.getenv("OKX_API_KEY", "").strip(' \'"\n\r\t'),
+        secret_key=os.getenv("OKX_SECRET_KEY", "").strip(' \'"\n\r\t'),
+        passphrase=os.getenv("OKX_PASSPHRASE", "").strip(' \'"\n\r\t')
     )
     
     # 2. Initialize the Facilitator and Resource Server
     facilitator_client = OKXFacilitatorClient(OKXFacilitatorConfig(auth=auth_config))
     resource_server = x402ResourceServer(facilitator_clients=[facilitator_client])
-    resource_server.register("eip155:195", ExactEvmScheme())
+    resource_server.register("eip155:196", ExactEvmScheme())
     
     route_config = {
         "POST /evaluate_rwa_risk": RouteConfig(
             accepts=[
                 PaymentOption(
                     scheme="exact",
-                    network="eip155:195",
-                    price={"amount": "50000", "asset": "0x779Ded0c9e1022225f8E0630b35a9b54bE713736"},
+                    network="eip155:196",
+                    price=AssetAmount(amount="50000", asset="0x779Ded0c9e1022225f8E0630b35a9b54bE713736"),
                     pay_to="0x1fd66d9e94a16db5a55bc03400282484962e2e8b",
                     extra={"name": "Tether USD", "version": "1"}
                 )

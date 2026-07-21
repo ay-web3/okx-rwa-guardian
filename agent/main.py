@@ -299,7 +299,7 @@ try:
     resource_server.register("eip155:196", ExactEvmScheme())
     
     route_config = {
-        "POST /evaluate_rwa_risk": RouteConfig(
+        "POST /api/v1/consumer/risk_report": RouteConfig(
             accepts=[
                 PaymentOption(
                     scheme="exact",
@@ -309,7 +309,19 @@ try:
                     extra={"name": "Tether USD", "version": "1"}
                 )
             ],
-            resource="/evaluate_rwa_risk"
+            resource="/api/v1/consumer/risk_report"
+        ),
+        "POST /api/v1/oracle/risk_verdict": RouteConfig(
+            accepts=[
+                PaymentOption(
+                    scheme="exact",
+                    network="eip155:196",
+                    price=AssetAmount(amount="50000", asset="0x779Ded0c9e1022225f8E0630b35a9b54bE713736"),
+                    pay_to="0x1fd66d9e94a16db5a55bc03400282484962e2e8b",
+                    extra={"name": "Tether USD", "version": "1"}
+                )
+            ],
+            resource="/api/v1/oracle/risk_verdict"
         )
     }
     
@@ -324,13 +336,11 @@ except Exception as e:
     raise RuntimeError(f"Failed to initialize OKX SDK: {e}")
 
 
-@app.post("/evaluate_rwa_risk")
-async def evaluate_rwa_risk(payload: DynamicEvaluatePayload):
+async def _core_risk_evaluation(payload: DynamicEvaluatePayload):
     """
-    MCP-Compliant Agentic Service Provider endpoint (Oracle Mode).
-    Requires payment of 0.05 USDT on X Layer mainnet via the OKX Agent Payments Protocol (x402 v2).
+    Internal helper to run the multi-agent AI pipeline.
     """
-    logger.info(f"ASP Request received: Evaluating {payload.asset_name} at {payload.lat},{payload.lon}")
+    logger.info(f"Running core AI pipeline for: {payload.asset_name} at {payload.lat},{payload.lon}")
 
     # Broadcast to the frontend terminal that the API Oracle was triggered
     await weather_agent.log(f"API Request Received. Initializing Swarm for {payload.asset_name} ({payload.lat}, {payload.lon})...", "dynamic_query")
@@ -388,22 +398,19 @@ async def evaluate_rwa_risk(payload: DynamicEvaluatePayload):
     signed_message = Account.sign_message(message, private_key=PRIVATE_KEY)
     verdict["signature"] = signed_message.signature.hex()
     
-    await executor_agent.log("Oracle payload returned successfully to client.", "dynamic_query")
+    await executor_agent.log("Oracle payload generated.", "dynamic_query")
     
-    # ── Build the final response ──
     # Determine the definitive action after the auditor's review
     auditor_decision = final_validation.get("decision", "OVERRULED")
     if auditor_decision == "APPROVED":
         final_action = verdict.get("recommendedAction", "normal")
     else:
-        # Auditor overruled: use the auditor's finalAction, fall back to modifications, then "hold"
         final_action = (
             final_validation.get("finalAction")
             or mods.get("recommendedAction")
             or "hold"
         )
     
-    # Map the final action to a human-readable risk level
     action_to_risk_level = {
         "normal": "LOW",
         "hold": "LOW",
@@ -414,28 +421,62 @@ async def evaluate_rwa_risk(payload: DynamicEvaluatePayload):
     }
     risk_level = action_to_risk_level.get(final_action, "MEDIUM")
     
-    result = {
+    return {
+        "final_action": final_action,
+        "risk_level": risk_level,
+        "final_validation": final_validation,
+        "verdict": verdict,
+        "auditor_decision": auditor_decision,
+        "mods": mods
+    }
+
+@app.post("/api/v1/consumer/risk_report")
+async def evaluate_rwa_consumer(payload: DynamicEvaluatePayload):
+    """
+    Consumer endpoint for retail traders or basic UI clients.
+    Returns a simplified summary of the asset's risk profile without heavy cryptographic data.
+    Requires 0.05 USDT via x402.
+    """
+    core = await _core_risk_evaluation(payload)
+    
+    # Return a clean, human-readable summary
+    return {
+        "status": "success",
+        "asset": payload.asset_name,
+        "location": {"lat": payload.lat, "lon": payload.lon},
+        "riskLevel": core["risk_level"],
+        "action": core["final_action"],
+        "consumerSummary": f"The overall risk level is {core['risk_level']}. {core['final_validation'].get('summary', 'No specific threats detected.')} The underlying AI agent network recommends to {core['final_action']}."
+    }
+
+@app.post("/api/v1/oracle/risk_verdict")
+async def evaluate_rwa_oracle(payload: DynamicEvaluatePayload):
+    """
+    Developer / Smart Contract endpoint for on-chain protocols.
+    Returns the exact numeric scores, full trace, and cryptographic signature for on-chain verification.
+    Requires 0.05 USDT via x402.
+    """
+    core = await _core_risk_evaluation(payload)
+    
+    # Return the full verbose payload intended for automated systems
+    return {
         "status": "success",
         "asset": payload.asset_name,
         "location": {"lat": payload.lat, "lon": payload.lon},
         "finalVerdict": {
-            "action": final_action,
-            "riskLevel": risk_level,
-            "summary": final_validation.get("summary", "Assessment complete.")
+            "action": core["final_action"],
+            "riskLevel": core["risk_level"],
+            "summary": core["final_validation"].get("summary", "Assessment complete.")
         },
-        "analyst": verdict,
+        "analyst": core["verdict"],
         "auditor": {
-            "decision": auditor_decision,
-            "finalAction": final_action,
-            "risk_of_false_positive": final_validation.get("risk_of_false_positive"),
-            "reasoning": final_validation.get("reasoning", ""),
-            "summary": final_validation.get("summary")
+            "decision": core["auditor_decision"],
+            "finalAction": core["final_action"],
+            "risk_of_false_positive": core["final_validation"].get("risk_of_false_positive"),
+            "reasoning": core["final_validation"].get("reasoning", ""),
+            "summary": core["final_validation"].get("summary")
         }
     }
-    
-    # The SDK's payment_middleware automatically handles injecting the PAYMENT-RESPONSE header
-    # and communicating with the OKX facilitator. We just return the core business result!
-    return result
 
 
 

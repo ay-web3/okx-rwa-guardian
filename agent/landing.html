@@ -859,42 +859,42 @@
             <div class="terminal-body" id="json-terminal-oracle">
                 <span class="t-prompt">$</span> <span class="t-cmd">curl -X POST /api/v1/oracle/risk_verdict \</span><br>
                 <span class="t-comment">&nbsp;&nbsp;-H "X-OKX-Payment-Signature: 0xa3f8..." \</span><br>
-                <span class="t-comment">&nbsp;&nbsp;-d '{"asset_name":"Noto Peninsula Estate","lat":37.3,"lon":137.0}'</span><br>
+                <span class="t-comment">&nbsp;&nbsp;-d '{"asset_name":"San Francisco Skyscraper","lat":37.77,"lon":-122.41}'</span><br>
                 <br>
                 <span class="t-output">{</span><br>
                 <span class="t-output">&nbsp;&nbsp;<span class="t-key">"status"</span>: <span class="t-str">"success"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"asset"</span>: <span class="t-str">"Noto Peninsula Estate"</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"asset"</span>: <span class="t-str">"San Francisco Skyscraper"</span>,</span><br>
                 <span class="t-output">&nbsp;&nbsp;<span class="t-key">"location"</span>: {</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"lat"</span>: <span class="t-num">37.3</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"lon"</span>: <span class="t-num">137</span></span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"lat"</span>: <span class="t-num">37.77</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"lon"</span>: <span class="t-num">-122.41</span></span><br>
                 <span class="t-output">&nbsp;&nbsp;},</span><br>
                 <span class="t-output">&nbsp;&nbsp;<span class="t-key">"finalVerdict"</span>: {</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"action"</span>: <span class="t-str">"normal"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"riskLevel"</span>: <span class="t-str">"LOW"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"summary"</span>: <span class="t-str">"The Noto Peninsula Estate is currently at no risk, and no action is required."</span></span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"action"</span>: <span class="t-str">"PAUSE TRADING for 24 hours to reassess the situation and gather more data before resuming trading."</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"riskLevel"</span>: <span class="t-str">"MEDIUM"</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"summary"</span>: <span class="t-str">"The Risk Analyst's verdict is overruled due to the potential threat posed by the minor earthquake, and trading is paused for 24 hours to reassess the situation."</span></span><br>
                 <span class="t-output">&nbsp;&nbsp;},</span><br>
                 <span class="t-output">&nbsp;&nbsp;<span class="t-key">"analyst"</span>: {</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"physicalRisk"</span>: <span class="t-num">0</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"physicalRisk"</span>: <span class="t-num">10</span>,</span><br>
                 <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"economicRisk"</span>: <span class="t-num">0</span>,</span><br>
                 <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"liquidityRisk"</span>: <span class="t-num">0</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"overallRisk"</span>: <span class="t-num">0</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"overallRisk"</span>: <span class="t-num">7</span>,</span><br>
                 <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"riskWeights"</span>: {</span><br>
                 <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"physical"</span>: <span class="t-num">0.5</span>,</span><br>
                 <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"economic"</span>: <span class="t-num">0.3</span>,</span><br>
                 <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"liquidity"</span>: <span class="t-num">0.2</span></span><br>
                 <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;},</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"recommendedAction"</span>: <span class="t-str">"normal"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"confidence"</span>: <span class="t-num">1</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"analysis"</span>: <span class="t-str">"Based on the reports from Weather Sentinel and News Intelligence, there are no environmental threats or news that could impact the Noto Peninsula Estate. The overall risk is therefore 0."</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"caveats"</span>: <span class="t-str">"This verdict assumes that the reports are accurate and up-to-date. Any changes in environmental conditions or news could impact the risk level."</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"signature"</span>: <span class="t-str">"4ee087d35f65a049cb11b1ea76b910e64da299f101c5aaa7b3c40272f3d582aa375898b63963f1520e6fa80a890130bfc6ce1426c999bb925ec9e4428c51c38d1b"</span></span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"recommendedAction"</span>: <span class="t-str">"PAUSE TRADING"</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"confidence"</span>: <span class="t-num">0.9</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"analysis"</span>: <span class="t-str">"The San Francisco Skyscraper is currently not under any significant environmental threat, with a minor earthquake occurring 80 km away having minimal potential impact. There is no news to report, and the overall news sentiment is neutral. Given the low physical risk and lack of economic or liquidity risks, the overall risk is low, and no action is recommended."</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"caveats"</span>: <span class="t-str">"The minor earthquake could potentially have unforeseen consequences, but the risk is deemed low based on the available data."</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"signature"</span>: <span class="t-str">"70df7457491186542f041b2ac0ca6492e310ff88cdcd0641e7cd6a71f9870c24780493670a3eea17668a538419fa85e03909511a96d35f395cc338730919fca61c"</span></span><br>
                 <span class="t-output">&nbsp;&nbsp;},</span><br>
                 <span class="t-output">&nbsp;&nbsp;<span class="t-key">"auditor"</span>: {</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"decision"</span>: <span class="t-str">"APPROVED"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"finalAction"</span>: <span class="t-str">"normal"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"risk_of_false_positive"</span>: <span class="t-num">0</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"reasoning"</span>: <span class="t-str">"The Risk Analyst's verdict is based on strong evidence from multiple sources, confirming that there are no environmental threats or news that could impact the Noto Peninsula Estate. The confidence level of 1.0 further supports the accuracy of this verdict."</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"summary"</span>: <span class="t-str">"The Noto Peninsula Estate is currently at no risk, and no action is required."</span></span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"decision"</span>: <span class="t-str">"OVERRULED"</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"finalAction"</span>: <span class="t-str">"PAUSE TRADING for 24 hours to reassess the situation and gather more data before resuming trading."</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"risk_of_false_positive"</span>: <span class="t-num">0.2</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"reasoning"</span>: <span class="t-str">"Although the Risk Analyst's verdict is based on a low physical risk, the minor earthquake 80 km away still poses a potential threat. Given the uncertainty of unforeseen consequences, a more cautious approach is warranted. The confidence level is high, but the cost of being wrong is too great, as investors may be locked out if trading is paused incorrectly, or suffer losses if trading is not paused and a severe event occurs."</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"summary"</span>: <span class="t-str">"The Risk Analyst's verdict is overruled due to the potential threat posed by the minor earthquake, and trading is paused for 24 hours to reassess the situation."</span></span><br>
                 <span class="t-output">&nbsp;&nbsp;}</span><br>
                 <span class="t-output">}</span><br>
                 <br>

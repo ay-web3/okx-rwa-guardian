@@ -446,6 +446,7 @@ async def evaluate_rwa_consumer(payload: DynamicEvaluatePayload):
         "location": {"lat": payload.lat, "lon": payload.lon},
         "riskLevel": core["risk_level"],
         "recommendedAction": core["final_action"],
+        "consumerSummary": f"The overall risk level is {core['risk_level']}. {core['final_validation'].get('summary', 'No specific threats detected.')} The underlying AI agent network recommends to {core['final_action']}.",
         "report": {
             "executiveSummary": core['final_validation'].get('summary', 'No specific threats detected.'),
             "detailedAnalysis": core['verdict'].get('analysis', ''),

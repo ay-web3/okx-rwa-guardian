@@ -826,12 +826,16 @@
                 <span class="t-comment">&nbsp;&nbsp;-d '{"asset_name":"Noto Peninsula Estate","lat":37.3,"lon":137.0}'</span><br>
                 <br>
                 <span class="t-output">{</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"asset_name"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"Noto Peninsula Estate"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"consumerSummary"</span>: <span class="t-str">"🚨 High Risk: 72/100 | Action: raiseCollateralRatio"</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"status"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"success"</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"asset"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"Noto Peninsula Estate"</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"riskLevel"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"LOW"</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"recommendedAction"</span>: <span class="t-str">"normal"</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"consumerSummary"</span>:&nbsp;&nbsp;&nbsp;<span class="t-str">"The overall risk level is LOW. The Noto Peninsula Estate is not currently facing any significant risks."</span>,</span><br>
                 <span class="t-output">&nbsp;&nbsp;<span class="t-key">"report"</span>: {</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"executiveSummary"</span>: <span class="t-str">"Recent 7.5 mag earthquake has caused massive structural threat."</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"riskFactors"</span>: { <span class="t-key">"physicalRisk"</span>: <span class="t-num">89</span>, <span class="t-key">"economicRisk"</span>: <span class="t-num">65</span> },</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"auditorNotes"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"Approved by Verification Agent."</span></span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"executiveSummary"</span>: <span class="t-str">"The Noto Peninsula Estate is not currently facing any significant risks."</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"detailedAnalysis"</span>: <span class="t-str">"Based on the reports from Weather Sentinel and News Intelligence, there are no environmental threats and no news to report."</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"riskFactors"</span>: { <span class="t-key">"physical"</span>: <span class="t-str">"Normal"</span>, <span class="t-key">"economic"</span>: <span class="t-str">"Normal"</span>, <span class="t-key">"liquidity"</span>: <span class="t-str">"Normal"</span> },</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"auditorNotes"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"The auditor approved the analyst's assessment."</span></span><br>
                 <span class="t-output">&nbsp;&nbsp;}</span><br>
                 <span class="t-output">}</span><br>
             </div>
@@ -850,11 +854,21 @@
                 <span class="t-comment">&nbsp;&nbsp;-d '{"asset_name":"Noto Peninsula Estate","lat":37.3,"lon":137.0}'</span><br>
                 <br>
                 <span class="t-output">{</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"asset_name"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"Noto Peninsula Estate"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"overallRisk"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-num">72</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"recommendedAction"</span>: <span class="t-str">"raiseCollateralRatio"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"confidence"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-num">0.96</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"signature"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"0x3a8f...c4e1"</span></span><br>
+                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"status"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"success"</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"asset"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"Noto Peninsula Estate"</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"finalVerdict"</span>: {</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"action"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"normal"</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"riskLevel"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"LOW"</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"summary"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"The Noto Peninsula Estate is currently at no risk, and no action is required."</span></span><br>
+                <span class="t-output">&nbsp;&nbsp;},</span><br>
+                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"analyst"</span>: {</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"overallRisk"</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-num">0</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"confidence"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-num">1.0</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"signature"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"4ee087d3...c51c38d1b"</span></span><br>
+                <span class="t-output">&nbsp;&nbsp;},</span><br>
+                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"auditor"</span>: {</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"decision"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"APPROVED"</span></span><br>
+                <span class="t-output">&nbsp;&nbsp;}</span><br>
                 <span class="t-output">}</span><br>
                 <br>
                 <span class="t-prompt">$</span> <span class="cursor"></span>

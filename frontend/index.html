@@ -35,10 +35,17 @@
                     </div>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <label style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">API Endpoint</label>
+                    <select id="api-endpoint" style="background: var(--bg-surface); border: 1px solid var(--border-color); color: white; padding: 0.8rem; font-family: 'JetBrains Mono'; border-radius: 4px;">
+                        <option value="/api/v1/consumer/risk_report">Consumer Risk Report</option>
+                        <option value="/api/v1/oracle/risk_verdict">Oracle Risk Verdict</option>
+                    </select>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                     <label style="color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">X-OKX-Payment-Signature (Header)</label>
                     <input type="text" id="api-sig" placeholder="Leave blank to test 402 Error" style="background: var(--bg-surface); border: 1px solid var(--border-color); color: white; padding: 0.8rem; font-family: 'JetBrains Mono'; border-radius: 4px;">
                 </div>
-                <button id="query-api-btn" class="glow-btn" style="margin-top: 1rem; border-color: var(--neon-cyan); color: var(--neon-cyan);">POST /evaluate_rwa_risk (0.10 USDC)</button>
+                <button id="query-api-btn" class="glow-btn" style="margin-top: 1rem; border-color: var(--neon-cyan); color: var(--neon-cyan);">POST Request (0.05 USDT)</button>
             </div>
         </section>
 

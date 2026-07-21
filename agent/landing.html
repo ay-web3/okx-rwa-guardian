@@ -744,7 +744,7 @@
                 <div class="stat-label">Live Data Sources</div>
             </div>
             <div class="stat">
-                <div class="stat-value">0.10<span class="unit"> USDC</span></div>
+                <div class="stat-value">0.05<span class="unit"> USDT</span></div>
                 <div class="stat-label">Per Query</div>
             </div>
         </div>
@@ -758,15 +758,15 @@
     <section>
         <div class="section-tag reveal">the problem</div>
         <h2 class="reveal">Smart contracts can't see the physical world</h2>
-        <p class="section-sub reveal">When a hurricane destroys a tokenized building, the blockchain doesn't know. Lending protocols keep issuing loans. Insurance doesn't trigger. Nobody knows until it's too late.</p>
+        <p class="section-sub reveal">When a major earthquake destroys a tokenized building, the blockchain doesn't know. Lending protocols keep issuing loans. Insurance doesn't trigger. Nobody knows until it's too late.</p>
         <div class="problem-grid">
             <div class="p-card bad reveal-left">
                 <h3>✕ Without RWA Guardian</h3>
-                <p>A Category 3 hurricane hits Miami. The tokenized condo is destroyed. The on-chain token keeps trading at full price. Lending protocols issue loans against rubble. The market corrects days later — after millions in losses.</p>
+                <p>A 7.5 magnitude earthquake hits Noto Peninsula. The tokenized estate is destroyed. The on-chain token keeps trading at full price. Lending protocols issue loans against rubble. The market corrects days later — after millions in losses.</p>
             </div>
             <div class="p-card good reveal-right">
                 <h3>✓ With RWA Guardian</h3>
-                <p>Our AI swarm detects the hurricane from NOAA, cross-references local news and economic data, and returns a signed decision: <code>raiseCollateralRatio</code>. The lending protocol tightens requirements automatically — before the storm makes landfall.</p>
+                <p>Our AI swarm detects the earthquake from USGS, cross-references local news and economic data, and returns a signed decision: <code>raiseCollateralRatio</code>. The lending protocol tightens requirements automatically — within seconds.</p>
             </div>
         </div>
     </section>
@@ -813,27 +813,48 @@
         <h2 class="reveal">Structured decisions, not raw data</h2>
         <p class="section-sub reveal">Protocols consume our output directly. No additional AI processing needed on the client side.</p>
 
+        <div class="terminal reveal" style="margin-bottom: 2rem;">
+            <div class="terminal-bar">
+                <span class="terminal-dot r"></span>
+                <span class="terminal-dot y"></span>
+                <span class="terminal-dot g"></span>
+                <span class="terminal-title">POST /api/v1/consumer/risk_report — 200 OK</span>
+            </div>
+            <div class="terminal-body" id="json-terminal-consumer">
+                <span class="t-prompt">$</span> <span class="t-cmd">curl -X POST /api/v1/consumer/risk_report \</span><br>
+                <span class="t-comment">&nbsp;&nbsp;-H "X-OKX-Payment-Signature: 0xa3f8..." \</span><br>
+                <span class="t-comment">&nbsp;&nbsp;-d '{"asset_name":"Noto Peninsula Estate","lat":37.3,"lon":137.0}'</span><br>
+                <br>
+                <span class="t-output">{</span><br>
+                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"asset_name"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"Noto Peninsula Estate"</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"consumerSummary"</span>: <span class="t-str">"🚨 High Risk: 72/100 | Action: raiseCollateralRatio"</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"report"</span>: {</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"executiveSummary"</span>: <span class="t-str">"Recent 7.5 mag earthquake has caused massive structural threat."</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"riskFactors"</span>: { <span class="t-key">"physicalRisk"</span>: <span class="t-num">89</span>, <span class="t-key">"economicRisk"</span>: <span class="t-num">65</span> },</span><br>
+                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"auditorNotes"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"Approved by Verification Agent."</span></span><br>
+                <span class="t-output">&nbsp;&nbsp;}</span><br>
+                <span class="t-output">}</span><br>
+            </div>
+        </div>
+
         <div class="terminal reveal">
             <div class="terminal-bar">
                 <span class="terminal-dot r"></span>
                 <span class="terminal-dot y"></span>
                 <span class="terminal-dot g"></span>
-                <span class="terminal-title">POST /evaluate_rwa_risk — 200 OK</span>
+                <span class="terminal-title">POST /api/v1/oracle/risk_verdict — 200 OK</span>
             </div>
-            <div class="terminal-body" id="json-terminal">
-                <span class="t-prompt">$</span> <span class="t-cmd">curl -X POST /evaluate_rwa_risk \</span><br>
+            <div class="terminal-body" id="json-terminal-oracle">
+                <span class="t-prompt">$</span> <span class="t-cmd">curl -X POST /api/v1/oracle/risk_verdict \</span><br>
                 <span class="t-comment">&nbsp;&nbsp;-H "X-OKX-Payment-Signature: 0xa3f8..." \</span><br>
-                <span class="t-comment">&nbsp;&nbsp;-d '{"asset_name":"Miami Condo","lat":25.79,"lon":-80.13}'</span><br>
+                <span class="t-comment">&nbsp;&nbsp;-d '{"asset_name":"Noto Peninsula Estate","lat":37.3,"lon":137.0}'</span><br>
                 <br>
                 <span class="t-output">{</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"physicalRisk"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-num">74</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"economicRisk"</span>:&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-num">61</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"liquidityRisk"</span>:&nbsp;&nbsp;&nbsp;<span class="t-num">49</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"overallRisk"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-num">68</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"asset_name"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"Noto Peninsula Estate"</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"overallRisk"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-num">72</span>,</span><br>
                 <span class="t-output">&nbsp;&nbsp;<span class="t-key">"recommendedAction"</span>: <span class="t-str">"raiseCollateralRatio"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"confidence"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-num">0.94</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"analysis"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"Cat 3 hurricane within 80km..."</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"signature"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"0x3a8f...c4e1"</span></span><br>
+                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"confidence"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-num">0.96</span>,</span><br>
+                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"signature"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"0x3a8f...c4e1"</span></span><br>
                 <span class="t-output">}</span><br>
                 <br>
                 <span class="t-prompt">$</span> <span class="cursor"></span>

@@ -9,7 +9,7 @@ Acting as an **Agentic Service Provider (ASP)**, RWA Guardian bridges the physic
 ## 🏆 OKX.AI Hackathon Fit
 
 This project was built specifically for the **OKX.AI Genesis Hackathon**. It perfectly demonstrates the power of Agentic Service Providers in DeFi:
-1. **Agent-to-Agent Commerce:** Uses the OKX Agent Payments Protocol (APP) to charge nano-payments (0.10 USDC) to external bots in exchange for AI risk intelligence.
+1. **Agent-to-Agent Commerce:** Uses the OKX Agent Payments Protocol (APP) to charge nano-payments (0.05 USDT) to external bots in exchange for AI risk intelligence.
 2. **Multi-Agent Swarm Architecture:** Instead of a monolithic LLM script, we implemented a robust 4-agent pipeline to eliminate AI hallucinations and false positives.
 3. **Real-World Integration:** Brings off-chain physical data (NOAA, USGS) on-chain via AI reasoning rather than traditional, rigid oracles.
 
@@ -35,10 +35,10 @@ By splitting the architecture into "Signal" (Our API) and "Action" (The Client's
 ### The Target Markets
 
 **1. Protocol Developers (Smart Contract Security)**
-A DeFi protocol developer connects their own local OKX Agentic Wallet to our ASP. They pay us **0.10 USDC** via the APP header to hit our `POST /evaluate_rwa_risk` endpoint. Our AI swarm processes the real-world data and returns a cryptographically signed instruction payload with structured actions (e.g., `{"recommendedAction": "raiseCollateralRatio"}`). The developer's *own* local Agentic Wallet verifies the signature and executes the transaction using their own private keys.
+A DeFi protocol developer connects their own local OKX Agentic Wallet to our ASP. They pay us **0.05 USDT** via the APP header to hit our `POST /api/v1/oracle/risk_verdict` endpoint. Our AI swarm processes the real-world data and returns a cryptographically signed instruction payload with structured actions. The developer's *own* local Agentic Wallet verifies the signature and executes the transaction.
 
-**2. Algorithmic Traders (Informational Arbitrage)**
-Traders pay us **0.10 USDC** to feed our risk assessments directly into their high-frequency trading bots. If our swarm detects a massive earthquake hitting a tokenized physical asset before the mainstream markets react, the trader's bot uses its OKX Agentic Wallet to instantly dump the token or open a short position on a DEX.
+**2. Algorithmic Traders & Retail Users (Informational Risk)**
+Traders pay us **0.05 USDT** to feed our risk assessments directly into their terminal via our `POST /api/v1/consumer/risk_report` endpoint. They get a human-readable executive summary of the real-world threats and can quickly dump the token or open a short position on a DEX.
 
 ---
 
@@ -53,23 +53,53 @@ Traders pay us **0.10 USDC** to feed our risk assessments directly into their hi
 
 ---
 
-## 📡 Sample API Response
+## 📡 API Endpoints & Sample Responses
 
 🔗 **Live API:** [`https://okx-rwa-guardian.onrender.com`](https://okx-rwa-guardian.onrender.com)
 
-When a client pays **0.10 USDC** via nano-payment and queries our Decision Oracle, the API returns a structured, multi-dimensional risk assessment that protocols can consume directly — no additional AI processing needed:
+Both endpoints require a **0.05 USDT** X402 Nano-Payment signature in the `X-OKX-Payment-Signature` header.
+
+### 1. Consumer Risk Report
+**`POST /api/v1/consumer/risk_report`**
+
+Provides a highly readable, nested analysis for retail investors and dashboards.
 
 ```json
 {
-  "physicalRisk": 74,
-  "economicRisk": 61,
-  "liquidityRisk": 49,
+  "asset_name": "Tokyo Commercial Plaza",
+  "consumerSummary": "🚨 High Risk: 72/100 | Action: raiseCollateralRatio",
+  "report": {
+    "executiveSummary": "The asset faces a significant threat from a 7.2 magnitude earthquake near Tokyo.",
+    "detailedAnalysis": "...",
+    "riskFactors": {
+      "physicalRisk": 74,
+      "economicRisk": 61,
+      "liquidityRisk": 49
+    },
+    "caveats": "Insurance costs remain stable; no regulatory changes detected.",
+    "auditorNotes": "Approved by Verification Agent."
+  }
+}
+```
+
+### 2. Oracle Risk Verdict
+**`POST /api/v1/oracle/risk_verdict`**
+
+Provides a structured, cryptographically signed payload for on-chain smart contracts.
+
+```json
+{
+  "asset_name": "Tokyo Commercial Plaza",
   "overallRisk": 68,
   "recommendedAction": "raiseCollateralRatio",
   "confidence": 0.94,
-  "analysis": "Category 3 hurricane warning within 80km of asset. Local rental market showing 12% YoY decline. Combined physical and economic pressure warrants increased collateral requirements.",
-  "dissenting_factors": "Insurance costs remain stable; no regulatory changes detected.",
-  "signature": "0x3a8f...c4e1"
+  "signature": "0x3a8f...c4e1",
+  "auditor_trace": "...",
+  "raw_scores": {
+    "physicalRisk": 74,
+    "economicRisk": 61,
+    "liquidityRisk": 49
+  }
 }
 ```
 

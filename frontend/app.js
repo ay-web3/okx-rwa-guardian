@@ -1,5 +1,5 @@
-const AGENT_LOGS_URL = 'http://127.0.0.1:8001/agent-logs?limit=10';
-const EVALUATE_URL = 'http://127.0.0.1:8001/evaluate_rwa_risk';
+const BASE_URL = 'http://127.0.0.1:8001';
+const AGENT_LOGS_URL = `${BASE_URL}/agent-logs?limit=10`;
 
 const elements = {
     queryBtn: document.getElementById('query-api-btn'),
@@ -67,8 +67,9 @@ elements.queryBtn.addEventListener('click', async () => {
     const originalText = elements.queryBtn.innerText;
     elements.queryBtn.innerText = 'PROCESSING REQUEST...';
     
+    const endpointPath = document.getElementById('api-endpoint').value;
     elements.apiResponseCode.style.color = "var(--text-muted)";
-    elements.apiResponseCode.innerText = "Initiating POST request to /evaluate_rwa_risk...\nWaiting for AI Swarm consensus...";
+    elements.apiResponseCode.innerText = `Initiating POST request to ${endpointPath}...\nWaiting for AI Swarm consensus...`;
 
     const payload = {
         asset_name: elements.apiAsset.value,
@@ -86,7 +87,7 @@ elements.queryBtn.addEventListener('click', async () => {
     }
 
     try {
-        const response = await fetch(EVALUATE_URL, {
+        const response = await fetch(`${BASE_URL}${endpointPath}`, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(payload)

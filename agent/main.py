@@ -439,14 +439,24 @@ async def evaluate_rwa_consumer(payload: DynamicEvaluatePayload):
     """
     core = await _core_risk_evaluation(payload)
     
-    # Return a clean, human-readable summary
+    # Return a richer, human-readable summary for consumers
     return {
         "status": "success",
         "asset": payload.asset_name,
         "location": {"lat": payload.lat, "lon": payload.lon},
         "riskLevel": core["risk_level"],
-        "action": core["final_action"],
-        "consumerSummary": f"The overall risk level is {core['risk_level']}. {core['final_validation'].get('summary', 'No specific threats detected.')} The underlying AI agent network recommends to {core['final_action']}."
+        "recommendedAction": core["final_action"],
+        "report": {
+            "executiveSummary": core['final_validation'].get('summary', 'No specific threats detected.'),
+            "detailedAnalysis": core['verdict'].get('analysis', ''),
+            "riskFactors": {
+                "physical": "Elevated" if core['verdict'].get('physicalRisk', 0) > 30 else "Normal",
+                "economic": "Elevated" if core['verdict'].get('economicRisk', 0) > 30 else "Normal",
+                "liquidity": "Elevated" if core['verdict'].get('liquidityRisk', 0) > 30 else "Normal"
+            },
+            "caveats": core['verdict'].get('caveats', ''),
+            "auditorNotes": core['final_validation'].get('reasoning', '') if core['auditor_decision'] == "OVERRULED" else "The auditor approved the analyst's assessment."
+        }
     }
 
 @app.post("/api/v1/oracle/risk_verdict")

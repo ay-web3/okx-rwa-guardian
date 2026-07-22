@@ -93,7 +93,21 @@ class RiskAnalystAgent(BaseAgent):
                 temperature=0.2,
                 response_format={"type": "json_object"}
             )
-            return json.loads(response.choices[0].message.content)
+            result = json.loads(response.choices[0].message.content)
+            
+            # LLMs often hallucinate basic arithmetic, so we enforce the formula deterministically
+            weights = result.get("riskWeights", {"physical": 0.5, "economic": 0.3, "liquidity": 0.2})
+            p_weight = weights.get("physical", 0.5)
+            e_weight = weights.get("economic", 0.3)
+            l_weight = weights.get("liquidity", 0.2)
+            
+            result["overallRisk"] = round(
+                result.get("physicalRisk", 0) * p_weight +
+                result.get("economicRisk", 0) * e_weight +
+                result.get("liquidityRisk", 0) * l_weight
+            )
+            
+            return result
         except Exception as e:
             logger.error(f"Risk Analyst LLM synthesis failed: {e}")
             return {

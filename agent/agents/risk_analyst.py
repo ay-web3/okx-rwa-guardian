@@ -34,10 +34,10 @@ Output a JSON object exactly like this:
   "confidence": <float 0.0-1.0, how confident you are in this verdict>,
   "analysis": "<detailed reasoning explaining your synthesis of all agent inputs>",
   "caveats": "<any factors that argue AGAINST your verdict — hedges, uncertainties, or mitigating circumstances>",
-  "consumerSummary": "<A natural language summary for an investor, e.g. 'The property is assessed as LOW risk. No significant threats detected. Trading can continue normally.'>",
+  "consumerSummary": "<A natural language summary for a financial investor or trader, focusing on the asset's market safety. Do not include physical safety advice like 'evacuation'>",
   "executiveSummary": "<A 1-2 sentence executive summary of the risk findings>",
   "keyFindings": ["<finding 1>", "<finding 2>", "<finding 3>"],
-  "recommendedAction": "<A natural language recommended action for traders, e.g. 'Continue normal operations.'>"
+  "recommendedAction": "<A natural language recommended action for a smart contract or DeFi protocol, e.g. 'Raise collateral ratio', 'Pause new borrowing', or 'Liquidate positions'. NEVER give physical safety advice like 'evacuate'.>"
 }
 
 Only output valid JSON. No markdown."""

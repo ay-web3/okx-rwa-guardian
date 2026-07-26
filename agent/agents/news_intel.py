@@ -83,31 +83,7 @@ class NewsIntelAgent(BaseAgent):
         properties = self.shared_state.get("properties", {})
 
         await self.log("News Intelligence online. Scanning media sources...")
-        import time
-        last_scan = 0
-
         while self._running:
-            now = time.time()
-            if now - last_scan >= 600:
-                for prop_id, prop in properties.items():
-                    await self.log(f"Scanning news for {prop['name']}...", prop_id)
-
-                    # Fetch raw news + any mock news injected from frontend
-                    real_news = await fetch_news_alerts(prop_id)
-                    mock_news = self.shared_state.get("mock_news", {}).get(prop_id, [])
-                    all_news = real_news + mock_news
-
-                    # Classify with LLM
-                    classification = await self.classify_news(all_news, prop)
-
-                    # Publish to bus
-                    await self.publish(
-                        MessageType.NEWS_ANALYZED,
-                        prop_id,
-                        classification
-                    )
-                last_scan = now
-
             # Check for API-driven on-demand requests
             try:
                 msg: Message = self.request_inbox.get_nowait()

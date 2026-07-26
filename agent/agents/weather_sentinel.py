@@ -20,7 +20,7 @@ For each alert, determine:
 
 Output a JSON object exactly matching this schema:
 {
-  "summary": "<one sentence summary of environmental conditions>",
+  "summary": "<Detailed paragraph explaining the current threat landscape, explicitly confirming if no threats are active>",
   "evidence": [
     {
       "source": "<original source, e.g. NOAA or USGS>",

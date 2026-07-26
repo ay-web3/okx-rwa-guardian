@@ -21,7 +21,7 @@ CRITICAL RULE: Most news is routine market reporting. Do NOT overreact.
 
 Output a JSON object exactly matching this schema:
 {
-  "summary": "<one sentence summary of the news landscape>",
+  "summary": "<Detailed paragraph explaining the current news landscape, explicitly confirming if no news is active>",
   "evidence": [
     {
       "source": "<origin of the news, e.g. Reuters or NYT>",

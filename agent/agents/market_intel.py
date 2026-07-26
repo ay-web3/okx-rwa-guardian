@@ -66,7 +66,7 @@ Market Data: {json.dumps(macro_data)}
 
 Return a JSON object exactly matching this schema:
 {{
-    "summary": "1-2 sentence assessment",
+    "summary": "<Detailed paragraph explaining the current market conditions, liquidity, and overall volatility risks in depth>",
     "evidence": [
         {{"source": "{macro_data['source']}", "severity": "{macro_data['severity']}", "confidence": {macro_data['confidence']}}}
     ],

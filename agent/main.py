@@ -15,7 +15,6 @@ from typing import Optional
 from message_bus import MessageBus, MessageType, Message
 from agents.weather_sentinel import WeatherSentinelAgent
 from agents.news_intel import NewsIntelAgent
-from agents.market_intel import MarketIntelAgent
 from agents.risk_analyst import RiskAnalystAgent
 from agents.consensus_validator import ConsensusValidatorAgent
 from agents.executor import ExecutorAgent
@@ -88,12 +87,11 @@ bus = MessageBus()
 
 weather_agent = WeatherSentinelAgent(bus=bus, shared_state=SHARED_STATE)
 news_agent = NewsIntelAgent(bus=bus, shared_state=SHARED_STATE)
-market_agent = MarketIntelAgent(bus=bus, shared_state=SHARED_STATE)
 risk_agent = RiskAnalystAgent(bus=bus, shared_state=SHARED_STATE)
 consensus_agent = ConsensusValidatorAgent(bus=bus, shared_state=SHARED_STATE)
 executor_agent = ExecutorAgent(bus=bus, shared_state=SHARED_STATE)
 
-ALL_AGENTS = [weather_agent, news_agent, market_agent, risk_agent, consensus_agent, executor_agent]
+ALL_AGENTS = [weather_agent, news_agent, risk_agent, consensus_agent, executor_agent]
 
 # ──────────────────────────────────────────────
 # Lifespan: Start/Stop all agents
@@ -131,7 +129,7 @@ description = """
 - **Cost:** `0.05 USDT per query` (via OKX Agent Payments Protocol)
 
 ### Core Capabilities
-This API allows smart contracts and external Web3 agents to query real-time, multi-dimensional risk assessments for tokenized Real-World Assets. The 4-agent swarm automatically correlates NOAA weather alerts, USGS earthquake data, and Google News sentiment into actionable protocol decisions (e.g., `raiseCollateralRatio`).
+This API allows smart contracts and external Web3 agents to query real-time, multi-dimensional risk assessments for tokenized Real-World Assets. The swarm automatically correlates NOAA weather alerts, USGS earthquake data, and Google News sentiment into actionable protocol decisions (e.g., `raiseCollateralRatio`).
 """
 
 app = FastAPI(
@@ -281,8 +279,8 @@ async def debug_weather(lat: float, lon: float):
     return {"status": "success", "lat": lat, "lon": lon, "alerts": alerts}
 
 @app.get("/api/v1/debug/trigger")
-async def debug_trigger(lat: float, lon: float):
-    payload = DynamicEvaluatePayload(asset_name="Debug", lat=lat, lon=lon)
+async def debug_trigger(lat: float, lon: float, asset_name: str = "Tokenized Real Estate Property"):
+    payload = DynamicEvaluatePayload(asset_name=asset_name, lat=lat, lon=lon)
     result = await _core_risk_evaluation(payload)
     return {"status": "success", "result": result}
 

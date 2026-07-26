@@ -10,10 +10,9 @@ logger = logging.getLogger(__name__)
 
 RISK_ANALYST_PROMPT = """You are the Senior Risk Analyst (Reasoning Agent) for RWA Guardian, a multi-agent AI system protecting tokenized real estate assets.
 
-You receive classified threat data from three field agents:
+You receive classified threat data from two field agents:
 1. Weather Sentinel — environmental threats (hurricanes, earthquakes, floods)
 2. News Intelligence — macroeconomic and regulatory threats
-3. Market Intelligence — on-chain liquidity and crypto market threats
 
 Your job is to SYNTHESIZE all incoming intelligence and produce a multi-dimensional risk verdict for the property.
 
@@ -22,16 +21,15 @@ Consider:
 - Cumulative risk: Multiple LOW threats can compound into MEDIUM overall risk.
 
 IMPORTANT — overallRisk MUST be computed as a weighted average, not a simple mean:
-  overallRisk = round(physicalRisk * 0.4 + economicRisk * 0.3 + liquidityRisk * 0.3)
+  overallRisk = round(physicalRisk * 0.6 + economicRisk * 0.4)
 Always use these exact weights. Include a "riskWeights" key showing the weights used.
 
 Output a JSON object exactly like this:
 {
   "physicalRisk": <int 0-100>,
   "economicRisk": <int 0-100>,
-  "liquidityRisk": <int 0-100>,
-  "overallRisk": <int 0-100, computed as physicalRisk*0.4 + economicRisk*0.3 + liquidityRisk*0.3>,
-  "riskWeights": {"physical": 0.4, "economic": 0.3, "liquidity": 0.3},
+  "overallRisk": <int 0-100, computed as physicalRisk*0.6 + economicRisk*0.4>,
+  "riskWeights": {"physical": 0.6, "economic": 0.4},
   "confidence": <float 0.0-1.0, how confident you are in this verdict>,
   "analysis": "<detailed reasoning explaining your synthesis of all agent inputs>",
   "caveats": "<any factors that argue AGAINST your verdict — hedges, uncertainties, or mitigating circumstances>"
@@ -57,7 +55,6 @@ class RiskAnalystAgent(BaseAgent):
         ) if self.api_key else None
         self.weather_inbox = self.subscribe(MessageType.WEATHER_ANALYZED)
         self.news_inbox = self.subscribe(MessageType.NEWS_ANALYZED)
-        self.market_inbox = self.subscribe(MessageType.MARKET_ANALYZED)
         # Buffer to collect data from multiple agents before synthesizing
         self._threat_buffer: dict[str, list] = {}
 
@@ -67,9 +64,8 @@ class RiskAnalystAgent(BaseAgent):
             return {
                 "physicalRisk": 0,
                 "economicRisk": 0,
-                "liquidityRisk": 0,
                 "overallRisk": 0,
-                "riskWeights": {"physical": 0.5, "economic": 0.3, "liquidity": 0.2},
+                "riskWeights": {"physical": 0.6, "economic": 0.4},
                 "recommendedAction": "normal",
                 "confidence": 0.0,
                 "analysis": "No API key configured.",
@@ -91,15 +87,13 @@ class RiskAnalystAgent(BaseAgent):
             result = json.loads(response.choices[0].message.content)
             
             # LLMs often hallucinate basic arithmetic, so we enforce the formula deterministically
-            weights = result.get("riskWeights", {"physical": 0.4, "economic": 0.3, "liquidity": 0.3})
-            p_weight = weights.get("physical", 0.4)
-            e_weight = weights.get("economic", 0.3)
-            l_weight = weights.get("liquidity", 0.3)
+            weights = result.get("riskWeights", {"physical": 0.6, "economic": 0.4})
+            p_weight = weights.get("physical", 0.6)
+            e_weight = weights.get("economic", 0.4)
             
             result["overallRisk"] = round(
                 result.get("physicalRisk", 0) * p_weight +
-                result.get("economicRisk", 0) * e_weight +
-                result.get("liquidityRisk", 0) * l_weight
+                result.get("economicRisk", 0) * e_weight
             )
             
             return result
@@ -108,9 +102,8 @@ class RiskAnalystAgent(BaseAgent):
             return {
                 "physicalRisk": 0,
                 "economicRisk": 0,
-                "liquidityRisk": 0,
                 "overallRisk": 0,
-                "riskWeights": {"physical": 0.5, "economic": 0.3, "liquidity": 0.2},
+                "riskWeights": {"physical": 0.6, "economic": 0.4},
                 "recommendedAction": "normal",
                 "confidence": 0.0,
                 "analysis": f"Synthesis error: {e}",
@@ -133,9 +126,6 @@ class RiskAnalystAgent(BaseAgent):
                 
                 try: messages.append(self.news_inbox.get_nowait())
                 except asyncio.QueueEmpty: pass
-                
-                try: messages.append(self.market_inbox.get_nowait())
-                except asyncio.QueueEmpty: pass
 
                 for msg in messages:
                     prop_id = msg.property_id
@@ -148,7 +138,7 @@ class RiskAnalystAgent(BaseAgent):
 
                     await self.log(f"Received intel from {agent_name} for {properties.get(prop_id, {}).get('name', prop_id)}", prop_id)
 
-                num_data_agents = 3  # Weather, News, Market
+                num_data_agents = 2  # Weather, News
 
                 # Check buffers to see if any property is ready
                 for prop_id, buffer in list(self._threat_buffer.items()):

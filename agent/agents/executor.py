@@ -181,16 +181,19 @@ class ExecutorAgent(BaseAgent):
                     "economic": "critical" if e_risk > 80 else "elevated" if e_risk > 50 else "neutral"
                 }
                     
+                agent_trace = self.bus.get_trace(prop_id)
+                agent_trace.append({
+                    "agent": "Executor",
+                    "time": datetime.utcnow().isoformat(),
+                    "decision": "Payload finalized and cryptographically signed."
+                })
+                    
                 oracle_payload["ai_metadata"] = {
                     "oracle_version": "2.0.0",
                     "action_human_readable": final_action,
                     "decision_basis": decision_basis,
                     "evidence": evidence,
-                    "agent_trace": self.bus.get_trace(prop_id),
-                    "consumer_summary": final_verdict.get("consumerSummary", ""),
-                    "executive_summary": final_verdict.get("executiveSummary", ""),
-                    "key_findings": final_verdict.get("keyFindings", []),
-                    "recommended_action": final_verdict.get("recommendedAction", "")
+                    "agent_trace": agent_trace
                 }
 
                 await self.publish(MessageType.PAYLOAD_SIGNED, prop_id, oracle_payload)

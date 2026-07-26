@@ -401,25 +401,48 @@ async def evaluate_rwa_consumer(payload: DynamicEvaluatePayload):
         if "error" in core:
             return {"status": "error", "message": core["error"]}
             
-        risk_score = core.get("overallRisk")
-        if risk_score is None:
-            risk_score = 0
+        onchain_data = core.get("onchain_data", {})
+        ai_meta = core.get("ai_metadata", {})
+        
+        risk_score = onchain_data.get("risk_score", 0)
+        action = ai_meta.get("action_human_readable", "normal")
+        decision_basis = ai_meta.get("decision_basis", {})
             
         if risk_score > 80: risk_level = "CRITICAL"
         elif risk_score > 50: risk_level = "HIGH"
         elif risk_score > 20: risk_level = "MEDIUM"
         else: risk_level = "LOW"
         
-        # Return a richer, human-readable summary for consumers
+        # Build the structured report matching the frontend UI
+        # We can extract the final auditor note and analyst summary from the agent_trace
+        agent_trace = ai_meta.get("agent_trace", [])
+        analyst_decision = "No threats detected."
+        auditor_decision = "Approved by consensus."
+        
+        for trace in agent_trace:
+            if trace.get("agent") == "Risk Analyst":
+                analyst_decision = trace.get("decision", analyst_decision).split("Analysis: ")[-1]
+            if trace.get("agent") == "Consensus Validator":
+                auditor_decision = trace.get("decision", auditor_decision).split("Reasoning: ")[-1]
+        
         return {
             "status": "success",
             "asset": payload.asset_name,
             "location": {"lat": payload.lat, "lon": payload.lon},
-            "riskScore": risk_score,
             "riskLevel": risk_level,
-            "recommendedAction": core.get("recommendedAction"),
-            "consumerSummary": f"The overall risk score is {risk_score}/100. The underlying AI agent network recommends: {core.get('recommendedAction')}.",
-            "evidence": core.get("evidence", [])
+            "recommendedAction": action,
+            "consumerSummary": f"The overall risk level is {risk_level}. The underlying AI agent network recommends to {action}.",
+            "report": {
+                "executiveSummary": f"Asset risk score is {risk_score}/100.",
+                "detailedAnalysis": analyst_decision,
+                "riskFactors": {
+                    "physical": decision_basis.get("weather", "neutral").capitalize(),
+                    "economic": decision_basis.get("economic", "neutral").capitalize(),
+                    "liquidity": "Normal" # Standard placeholder as requested
+                },
+                "caveats": "The absence of threats does not guarantee that no risks will arise in the future. Continuous monitoring is still necessary.",
+                "auditorNotes": auditor_decision
+            }
         }
     except Exception as e:
         logger.error(f"Consumer endpoint error: {e}", exc_info=True)

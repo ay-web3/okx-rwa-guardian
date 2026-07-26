@@ -58,6 +58,8 @@ class WeatherSentinelAgent(BaseAgent):
             return {"classified_threats": [], "overall_environmental_risk": "NONE", "summary": "No environmental threats detected."}
 
         try:
+            print(f"DEBUG: Weather API raw data for {property_info['coordinates']['lat']},{property_info['coordinates']['lon']}: {json.dumps(raw_alerts)}")
+            print(f"DEBUG: Weather Sentinel Prompt: {WEATHER_SYSTEM_PROMPT}")
             response = await self.client.chat.completions.create(
                 model="llama-3.1-8b-instant",
                 messages=[

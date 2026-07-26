@@ -42,8 +42,8 @@ class BaseAgent(ABC):
         log_entry = f"[{self.name}] {message}"
         self.logger.info(log_entry)
         
-        # Append to the shared trace via the event bus
-        await self.bus.append_trace(property_id, self.name, message)
+        # Publish log to the bus for trace and frontend
+        await self.publish(MessageType.AGENT_LOG, property_id, {"summary": message})
         
         # In a real system, you might push this to a Redis pub/sub or WebSockets
         # For this demo, we simulate the network delay

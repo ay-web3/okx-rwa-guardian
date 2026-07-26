@@ -75,7 +75,7 @@ class ConsensusValidatorAgent(BaseAgent):
             )
 
             response = await self.client.chat.completions.create(
-                model="llama-3.1-8b-instant",
+                model="llama-3.3-70b-versatile",
                 messages=[
                     {"role": "system", "content": CONSENSUS_PROMPT},
                     {"role": "user", "content": user_content}

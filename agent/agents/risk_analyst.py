@@ -80,7 +80,7 @@ class RiskAnalystAgent(BaseAgent):
             user_content = f"Property: {json.dumps(property_info, default=str)}\n\nAgent Reports:\n{json.dumps(threat_reports, default=str)}"
 
             response = await self.client.chat.completions.create(
-                model="llama-3.1-8b-instant",
+                model="llama-3.3-70b-versatile",
                 messages=[
                     {"role": "system", "content": RISK_ANALYST_PROMPT},
                     {"role": "user", "content": user_content}

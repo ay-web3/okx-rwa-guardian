@@ -61,7 +61,7 @@ class WeatherSentinelAgent(BaseAgent):
             await self.log(f"DEBUG: Weather API raw data for {property_info['coordinates']['lat']},{property_info['coordinates']['lon']}: {json.dumps(raw_alerts)}", property_info["id"])
             await self.log(f"DEBUG: Weather Sentinel Prompt: {WEATHER_SYSTEM_PROMPT}", property_info["id"])
             response = await self.client.chat.completions.create(
-                model="llama-3.1-8b-instant",
+                model="llama-3.3-70b-versatile",
                 messages=[
                     {"role": "system", "content": WEATHER_SYSTEM_PROMPT},
                     {"role": "user", "content": f"Property: {property_info['name']} at ({property_info['coordinates']['lat']}, {property_info['coordinates']['lon']})\n\nRaw alerts:\n{json.dumps(raw_alerts, default=str)}"}
@@ -88,7 +88,7 @@ class WeatherSentinelAgent(BaseAgent):
 
         while self._running:
             now = time.time()
-            if now - last_scan >= 60:
+            if now - last_scan >= 600:
                 for prop_id, prop in properties.items():
                     lat = prop["coordinates"]["lat"]
                     lon = prop["coordinates"]["lon"]

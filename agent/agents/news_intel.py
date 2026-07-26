@@ -59,7 +59,7 @@ class NewsIntelAgent(BaseAgent):
 
         try:
             response = await self.client.chat.completions.create(
-                model="llama-3.1-8b-instant",
+                model="llama-3.3-70b-versatile",
                 messages=[
                     {"role": "system", "content": NEWS_SYSTEM_PROMPT},
                     {"role": "user", "content": f"Property: {property_info['name']}\n\nNews headlines:\n{json.dumps(news_alerts, default=str)}"}
@@ -87,7 +87,7 @@ class NewsIntelAgent(BaseAgent):
 
         while self._running:
             now = time.time()
-            if now - last_scan >= 60:
+            if now - last_scan >= 600:
                 for prop_id, prop in properties.items():
                     await self.log(f"Scanning news for {prop['name']}...", prop_id)
 

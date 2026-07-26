@@ -80,7 +80,7 @@ Return a JSON object exactly matching this schema:
                 raise ValueError("No API key available for LLM.")
                 
             response = await self.client.chat.completions.create(
-                model="llama-3.1-8b-instant",
+                model="llama-3.3-70b-versatile",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": "Assess market risk."}
@@ -107,12 +107,14 @@ Return a JSON object exactly matching this schema:
     async def run(self):
         """Listen for EVALUATION_REQUESTED events and publish market analysis."""
         await self.log("Market Intelligence online. Monitoring DEX liquidity...")
+        last_scan = 0
         while self._running:
             try:
-                msg: Message = self.request_inbox.get_nowait()
+                now = time.time()
+                if now - last_scan >= 600:
+                    last_scan = now
+                msg = self.request_inbox.get_nowait()
                 req_prop_id = msg.property_id
                 await self.analyze_market(msg.payload, req_prop_id)
             except asyncio.QueueEmpty:
-                pass
-            import asyncio
-            await asyncio.sleep(1)
+                await asyncio.sleep(1)

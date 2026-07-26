@@ -828,8 +828,9 @@
             </div>
             <div class="terminal-body" id="json-terminal-consumer">
                 
+
 <span class="t-prompt">$</span> <span class="t-cmd">curl -X POST /api/v1/consumer/risk_report \</span><br>
-<span class="t-comment">&nbsp;&nbsp;-H "X-OKX-Payment-Signature: 0xa3f8..." \</span><br>
+<span class="t-comment">&nbsp;&nbsp;-H "PAYMENT-SIGNATURE: 0xde04..." \</span><br>
 <span class="t-comment">&nbsp;&nbsp;-d '{"asset_name":"Miami Beach Condo","lat":25.79,"lon":-80.12}'</span><br>
 <br>
 <span class="t-output">{</span><br>
@@ -839,19 +840,30 @@
 <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"lat"</span>: <span class="t-num">25.79</span>,</span><br>
 <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"lon"</span>: <span class="t-num">-80.12</span></span><br>
 <span class="t-output">&nbsp;&nbsp;},</span><br>
-<span class="t-output">&nbsp;&nbsp;<span class="t-key">"riskLevel"</span>: <span class="t-str">"ELEVATED"</span>,</span><br>
-<span class="t-output">&nbsp;&nbsp;<span class="t-key">"recommendedAction"</span>: <span class="t-str">"Consider hedging exposure or purchasing supplemental flood insurance."</span>,</span><br>
-<span class="t-output">&nbsp;&nbsp;<span class="t-key">"consumerSummary"</span>: <span class="t-str">"The overall risk level is ELEVATED. While the local economy is stable, Weather Sentinel has flagged an active severe hurricane warning approaching the Miami coastline, drastically increasing physical risk."</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;<span class="t-key">"assessmentTime"</span>: <span class="t-str">"2026-07-26T13:55:32Z"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;<span class="t-key">"riskLevel"</span>: <span class="t-str">"LOW"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;<span class="t-key">"overallScore"</span>: {</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"score"</span>: <span class="t-num">4</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"max"</span>: <span class="t-num">100</span></span><br>
+<span class="t-output">&nbsp;&nbsp;},</span><br>
+<span class="t-output">&nbsp;&nbsp;<span class="t-key">"recommendedAction"</span>: <span class="t-str">"Normal operations"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;<span class="t-key">"monitoringStatus"</span>: <span class="t-str">"Continuous AI monitoring active."</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;<span class="t-key">"consumerSummary"</span>: <span class="t-str">"The property is currently assessed as LOW risk."</span>,</span><br>
 <span class="t-output">&nbsp;&nbsp;<span class="t-key">"report"</span>: {</span><br>
-<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"executiveSummary"</span>: <span class="t-str">"Miami Beach Condo faces elevated physical headwinds due to a severe hurricane warning."</span>,</span><br>
-<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"detailedAnalysis"</span>: <span class="t-str">"News Intelligence reports normal economic conditions. However, Weather Sentinel has detected a Category 4 hurricane projected to make landfall within 48 hours, leading to an elevated physical risk score of 75."</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"executiveSummary"</span>: <span class="t-str">"Asset risk score is 4/100."</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"keyFindings"</span>: [</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"No active weather or seismic alerts"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"Routine market activity with no signs of economic downturn"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"Low overall risk assessment"</span></span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;],</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"detailedAnalysis"</span>: <span class="t-str">"The Weather Sentinel report indicates no active weather or seismic alerts affecting the Miami Beach Condo property, suggesting a safe and stable environment. The News Intelligence report also suggests routine market activity with no signs of a regulatory crackdown, market crash, or severe economic downturn. The overall risk is low due to the lack of any significant threats from either the weather or economic fronts."</span>,</span><br>
 <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"riskFactors"</span>: {</span><br>
-<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"physical"</span>: <span class="t-str">"Elevated"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"physical"</span>: <span class="t-str">"Normal"</span>,</span><br>
 <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"economic"</span>: <span class="t-str">"Normal"</span>,</span><br>
 <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"liquidity"</span>: <span class="t-str">"Normal"</span></span><br>
 <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;},</span><br>
-<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"caveats"</span>: <span class="t-str">"Hurricane trajectories can shift rapidly. Maintain close monitoring over the next 24 hours."</span>,</span><br>
-<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"auditorNotes"</span>: <span class="t-str">"The auditor approved the analyst's assessment."</span></span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"caveats"</span>: <span class="t-str">"The absence of threats does not guarantee that no risks will arise in the future. Continuous monitoring is still necessary."</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"auditorNotes"</span>: <span class="t-str">"The independent validation agent reviewed the assessment and found no evidence requiring additional intervention."</span></span><br>
 <span class="t-output">&nbsp;&nbsp;}</span><br>
 <span class="t-output">}</span><br>
 <br>

@@ -275,6 +275,11 @@ async def get_agent_logs(limit: int = 50):
     """Returns recent inter-agent messages. Great for demonstrating the AI swarm's internal reasoning to hackathon judges."""
     return bus.get_recent_logs(limit=limit)
 
+@app.get("/api/v1/debug/weather")
+async def debug_weather(lat: float, lon: float):
+    alerts = await fetch_weather_alerts(lat, lon)
+    return {"status": "success", "lat": lat, "lon": lon, "alerts": alerts}
+
 class DynamicEvaluatePayload(BaseModel):
     asset_name: str = "Miami Condo"
     lat: float = 25.79

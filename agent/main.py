@@ -280,6 +280,12 @@ async def debug_weather(lat: float, lon: float):
     alerts = await fetch_weather_alerts(lat, lon)
     return {"status": "success", "lat": lat, "lon": lon, "alerts": alerts}
 
+@app.get("/api/v1/debug/trigger")
+async def debug_trigger(lat: float, lon: float):
+    payload = DynamicEvaluatePayload(asset_name="Debug", lat=lat, lon=lon)
+    result = await _core_risk_evaluation(payload)
+    return {"status": "success", "result": result}
+
 class DynamicEvaluatePayload(BaseModel):
     asset_name: str = "Miami Condo"
     lat: float = 25.79

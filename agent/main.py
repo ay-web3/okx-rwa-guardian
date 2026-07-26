@@ -360,11 +360,11 @@ async def _core_risk_evaluation(payload: DynamicEvaluatePayload):
     await weather_agent.log(f"API Request Received. Initializing Swarm for {payload.asset_name}...", prop_id)
     
     # Subscribe to the final result before triggering
-    result_queue = shared_bus.subscribe(MessageType.PAYLOAD_SIGNED)
+    result_queue = bus.subscribe(MessageType.PAYLOAD_SIGNED)
 
     from message_bus import Message
     # Trigger the pipeline
-    await shared_bus.publish(Message(
+    await bus.publish(Message(
         type=MessageType.EVALUATION_REQUESTED,
         sender="API Gateway",
         property_id=prop_id,

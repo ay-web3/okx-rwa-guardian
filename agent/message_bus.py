@@ -113,6 +113,7 @@ class MessageBus:
                         
                 trace.append({
                     "agent": agent_name,
+                    "time": msg.timestamp,
                     "decision": decision_text
                 })
         return trace

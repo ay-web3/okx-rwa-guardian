@@ -145,7 +145,7 @@ class ExecutorAgent(BaseAgent):
                         "action_code": action_code,
                         "timestamp": timestamp_unix,
                         "expiration": timestamp_unix + 300,
-                        "nonce": int(uuid.uuid4().int >> 192) # Random uint64
+                        "nonce": int(uuid.uuid4().int >> 64) # Random uint64
                     }
                 }
 

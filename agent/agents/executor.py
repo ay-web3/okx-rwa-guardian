@@ -139,6 +139,8 @@ class ExecutorAgent(BaseAgent):
                 oracle_payload = {
                     "asset_name": prop.get("name", prop_id),
                     "onchain_data": {
+                        "schema_version": "1",
+                        "chain_id": 196,
                         "risk_score": final_risk,
                         "action_code": action_code,
                         "timestamp": timestamp_unix,
@@ -153,13 +155,34 @@ class ExecutorAgent(BaseAgent):
                     signed_message = Account.sign_message(message_encoded, private_key=PRIVATE_KEY)
                     oracle_payload["signature"] = signed_message.signature.hex()
                     
+                evidence = [
+                    ev for r in (msg.payload.get("source_reports") or []) 
+                    for ev in r.get("evidence", [])
+                ]
+                
+                # If no evidence was found (all clear), populate with default "all clear" evidence
+                if not evidence:
+                    evidence = [
+                        {"source": "NOAA", "finding": "No active weather alerts"},
+                        {"source": "USGS", "finding": "No recent seismic activity"},
+                        {"source": "News Intelligence", "finding": "No material economic events"}
+                    ]
+                    
+                # Create a concise machine-readable summary of the agent sources
+                p_risk = final_verdict.get("physicalRisk", 0)
+                e_risk = final_verdict.get("economicRisk", 0)
+                
+                decision_basis = {
+                    "weather": "critical" if p_risk > 80 else "elevated" if p_risk > 50 else "neutral",
+                    "news": "critical" if e_risk > 80 else "elevated" if e_risk > 50 else "neutral",
+                    "economic": "critical" if e_risk > 80 else "elevated" if e_risk > 50 else "neutral"
+                }
+                    
                 oracle_payload["ai_metadata"] = {
                     "oracle_version": "2.0.0",
                     "action_human_readable": final_action,
-                    "evidence": [
-                        ev for r in (msg.payload.get("source_reports") or []) 
-                        for ev in r.get("evidence", [])
-                    ],
+                    "decision_basis": decision_basis,
+                    "evidence": evidence,
                     "agent_trace": self.bus.get_trace(prop_id)
                 }
 

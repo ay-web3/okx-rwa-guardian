@@ -55,7 +55,7 @@ class MarketIntelAgent(BaseAgent):
             "confidence": 0.5
         }
 
-    async def analyze_market(self, property_info: dict) -> dict:
+    async def analyze_market(self, property_info: dict, property_id: str) -> dict:
         await self.log("Fetching real-time on-chain liquidity data...", property_info["id"])
         macro_data = await self.fetch_real_liquidity_data()
         
@@ -91,16 +91,17 @@ Return a JSON object exactly matching this schema:
             parsed = json.loads(response.choices[0].message.content)
             
             # Emit to event bus for tracing
-            await self.publish(MessageType.MARKET_ANALYZED, property_id=property_info["id"], payload=parsed)
+            await self.publish(MessageType.MARKET_ANALYZED, property_id=property_id, payload=parsed)
             return parsed
         except Exception as e:
-            self.logger.error(f"Failed to parse Market LLM response: {e}")
+            self.logger.error(f"Market Intel analysis failed: {e}")
             fallback = {
-                "summary": f"Market is experiencing {macro_data['severity']} volatility.",
-                "evidence": [{"source": macro_data['source'], "severity": macro_data['severity'], "confidence": macro_data['confidence']}],
-                "confidence": macro_data['confidence']
+                "marketRisk": 0,
+                "liquidityStatus": "UNKNOWN",
+                "volatility": "UNKNOWN",
+                "evidence": [f"Market analysis error: {e}"]
             }
-            await self.publish(MessageType.MARKET_ANALYZED, property_id=property_info["id"], payload=fallback)
+            await self.publish(MessageType.MARKET_ANALYZED, property_id=property_id, payload=fallback)
             return fallback
 
     async def run(self):
@@ -110,7 +111,7 @@ Return a JSON object exactly matching this schema:
             try:
                 msg: Message = self.request_inbox.get_nowait()
                 req_prop_id = msg.property_id
-                await self.analyze_market(msg.payload)
+                await self.analyze_market(msg.payload, req_prop_id)
             except asyncio.QueueEmpty:
                 pass
             import asyncio

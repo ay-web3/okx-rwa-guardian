@@ -1,5 +1,7 @@
 import json
+import os
 import aiohttp
+from openai import AsyncOpenAI
 from typing import Dict, Any, List
 from .base_agent import BaseAgent
 from message_bus import MessageBus, MessageType
@@ -11,6 +13,11 @@ class MarketIntelAgent(BaseAgent):
     """
     def __init__(self, bus: MessageBus, shared_state: dict):
         super().__init__(name="Market Intel", emoji="📈", bus=bus, shared_state=shared_state)
+        self.api_key = os.getenv("GROQ_API_KEY") or os.getenv("OPENAI_API_KEY")
+        self.client = AsyncOpenAI(
+            api_key=self.api_key,
+            base_url="https://api.groq.com/openai/v1"
+        ) if self.api_key else None
         self.request_inbox = self.subscribe(MessageType.EVALUATION_REQUESTED)
 
     async def fetch_real_liquidity_data(self) -> Dict[str, Any]:
@@ -57,7 +64,7 @@ Assess the liquidity risk for the tokenized asset based on the following real-ti
 Asset: {json.dumps(property_info)}
 Market Data: {json.dumps(macro_data)}
 
-Return a JSON object:
+Return a JSON object exactly matching this schema:
 {{
     "summary": "1-2 sentence assessment",
     "evidence": [
@@ -66,12 +73,22 @@ Return a JSON object:
     "confidence": {macro_data['confidence']}
 }}"""
         
-        from core.llm import ask_llm
         await self.log("Analyzing market conditions...", property_info["id"])
-        response = await ask_llm(system_prompt, "Assess market risk.")
         
         try:
-            parsed = json.loads(response)
+            if not self.client:
+                raise ValueError("No API key available for LLM.")
+                
+            response = await self.client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": "Assess market risk."}
+                ],
+                temperature=0.1,
+                response_format={"type": "json_object"}
+            )
+            parsed = json.loads(response.choices[0].message.content)
             
             # Emit to event bus for tracing
             await self.publish(MessageType.MARKET_ANALYZED, property_id=property_info["id"], payload=parsed)

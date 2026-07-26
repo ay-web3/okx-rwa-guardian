@@ -387,26 +387,25 @@ async def evaluate_rwa_consumer(payload: DynamicEvaluatePayload):
     Requires 0.05 USDT via x402.
     """
     core = await _core_risk_evaluation(payload)
+    if "error" in core:
+        return {"status": "error", "message": core["error"]}
+        
+    risk_score = core.get("overallRisk", 0)
+    if risk_score > 80: risk_level = "CRITICAL"
+    elif risk_score > 50: risk_level = "HIGH"
+    elif risk_score > 20: risk_level = "MEDIUM"
+    else: risk_level = "LOW"
     
     # Return a richer, human-readable summary for consumers
     return {
         "status": "success",
         "asset": payload.asset_name,
         "location": {"lat": payload.lat, "lon": payload.lon},
-        "riskLevel": core["risk_level"],
-        "recommendedAction": core["final_action"],
-        "consumerSummary": f"The overall risk level is {core['risk_level']}. {core['final_validation'].get('summary', 'No specific threats detected.')} The underlying AI agent network recommends to {core['final_action']}.",
-        "report": {
-            "executiveSummary": core['final_validation'].get('summary', 'No specific threats detected.'),
-            "detailedAnalysis": core['verdict'].get('analysis', ''),
-            "riskFactors": {
-                "physical": "Elevated" if core['verdict'].get('physicalRisk', 0) > 30 else "Normal",
-                "economic": "Elevated" if core['verdict'].get('economicRisk', 0) > 30 else "Normal",
-                "liquidity": "Elevated" if core['verdict'].get('liquidityRisk', 0) > 30 else "Normal"
-            },
-            "caveats": core['verdict'].get('caveats', ''),
-            "auditorNotes": core['final_validation'].get('reasoning', '') if core['auditor_decision'] == "OVERRULED" else "The auditor approved the analyst's assessment."
-        }
+        "riskScore": risk_score,
+        "riskLevel": risk_level,
+        "recommendedAction": core.get("recommendedAction"),
+        "consumerSummary": f"The overall risk score is {risk_score}/100. The underlying AI agent network recommends: {core.get('recommendedAction')}.",
+        "evidence": core.get("evidence", [])
     }
 
 @app.post("/api/v1/oracle/risk_verdict")
@@ -417,25 +416,13 @@ async def evaluate_rwa_oracle(payload: DynamicEvaluatePayload):
     Requires 0.05 USDT via x402.
     """
     core = await _core_risk_evaluation(payload)
-    
+    if "error" in core:
+        return {"status": "error", "message": core["error"]}
+        
     # Return the full verbose payload intended for automated systems
     return {
         "status": "success",
-        "asset": payload.asset_name,
-        "location": {"lat": payload.lat, "lon": payload.lon},
-        "finalVerdict": {
-            "action": core["final_action"],
-            "riskLevel": core["risk_level"],
-            "summary": core["final_validation"].get("summary", "Assessment complete.")
-        },
-        "analyst": core["verdict"],
-        "auditor": {
-            "decision": core["auditor_decision"],
-            "finalAction": core["final_action"],
-            "risk_of_false_positive": core["final_validation"].get("risk_of_false_positive"),
-            "reasoning": core["final_validation"].get("reasoning", ""),
-            "summary": core["final_validation"].get("summary")
-        }
+        "oraclePayload": core
     }
 
 

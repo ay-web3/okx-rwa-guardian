@@ -115,7 +115,10 @@ class ExecutorAgent(BaseAgent):
                 from web3_client import PRIVATE_KEY
                 
                 # We determine the action deterministically here in python based on final risk
-                final_risk = final_verdict.get("overallRisk", 0)
+                final_risk = final_verdict.get("overallRisk")
+                if final_risk is None:
+                    final_risk = 0
+                
                 if decision == "MANUAL_REVIEW":
                     final_action = "MANUAL_REVIEW"
                 elif final_risk > 80:

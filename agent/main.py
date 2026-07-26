@@ -390,7 +390,10 @@ async def evaluate_rwa_consumer(payload: DynamicEvaluatePayload):
     if "error" in core:
         return {"status": "error", "message": core["error"]}
         
-    risk_score = core.get("overallRisk", 0)
+    risk_score = core.get("overallRisk")
+    if risk_score is None:
+        risk_score = 0
+        
     if risk_score > 80: risk_level = "CRITICAL"
     elif risk_score > 50: risk_level = "HIGH"
     elif risk_score > 20: risk_level = "MEDIUM"

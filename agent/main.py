@@ -12,7 +12,7 @@ load_dotenv()
 
 from typing import Optional
 
-from message_bus import MessageBus
+from message_bus import MessageBus, MessageType, Message
 from agents.weather_sentinel import WeatherSentinelAgent
 from agents.news_intel import NewsIntelAgent
 from agents.market_intel import MarketIntelAgent
@@ -362,7 +362,6 @@ async def _core_risk_evaluation(payload: DynamicEvaluatePayload):
     # Subscribe to the final result before triggering
     result_queue = bus.subscribe(MessageType.PAYLOAD_SIGNED)
 
-    from message_bus import Message
     # Trigger the pipeline
     await bus.publish(Message(
         type=MessageType.EVALUATION_REQUESTED,

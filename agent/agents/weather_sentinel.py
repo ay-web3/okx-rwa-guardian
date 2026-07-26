@@ -115,8 +115,8 @@ class WeatherSentinelAgent(BaseAgent):
             try:
                 msg: Message = self.request_inbox.get_nowait()
                 req_prop_id = msg.property_id
-                req_lat = msg.payload.get("lat")
-                req_lon = msg.payload.get("lon")
+                req_lat = msg.payload.get("coordinates", {}).get("lat")
+                req_lon = msg.payload.get("coordinates", {}).get("lon")
                 
                 await self.log(f"Handling on-demand request for {msg.payload.get('name', req_prop_id)}...", req_prop_id)
                 weather_alerts = await fetch_weather_alerts(req_lat, req_lon)

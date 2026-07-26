@@ -88,25 +88,25 @@ class WeatherSentinelAgent(BaseAgent):
             now = time.time()
             if now - last_scan >= 60:
                 for prop_id, prop in properties.items():
-                lat = prop["coordinates"]["lat"]
-                lon = prop["coordinates"]["lon"]
+                    lat = prop["coordinates"]["lat"]
+                    lon = prop["coordinates"]["lon"]
 
-                await self.log(f"Scanning {prop['name']} ({lat}, {lon})...", prop_id)
+                    await self.log(f"Scanning {prop['name']} ({lat}, {lon})...", prop_id)
 
-                # Fetch raw data
-                weather_alerts = await fetch_weather_alerts(lat, lon)
-                earthquake_alerts = await fetch_earthquake_alerts(lat, lon)
-                raw_alerts = weather_alerts + earthquake_alerts
+                    # Fetch raw data
+                    weather_alerts = await fetch_weather_alerts(lat, lon)
+                    earthquake_alerts = await fetch_earthquake_alerts(lat, lon)
+                    raw_alerts = weather_alerts + earthquake_alerts
 
-                # Classify with LLM
-                classification = await self.classify_threats(raw_alerts, prop)
+                    # Classify with LLM
+                    classification = await self.classify_threats(raw_alerts, prop)
 
-                # Publish to bus
-                await self.publish(
-                    MessageType.WEATHER_ANALYZED,
-                    prop_id,
-                    classification
-                )
+                    # Publish to bus
+                    await self.publish(
+                        MessageType.WEATHER_ANALYZED,
+                        prop_id,
+                        classification
+                    )
                 last_scan = now
 
             # Check for API-driven on-demand requests

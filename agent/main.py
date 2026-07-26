@@ -6,7 +6,7 @@ from fastapi import FastAPI, Header, HTTPException, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -285,9 +285,9 @@ async def debug_trigger(lat: float, lon: float, asset_name: str = "Tokenized Rea
     return {"status": "success", "result": result}
 
 class DynamicEvaluatePayload(BaseModel):
-    asset_name: str = "Miami Condo"
-    lat: float = 25.79
-    lon: float = -80.13
+    asset_name: str = Field(..., max_length=100, description="Name of the asset")
+    lat: float = Field(..., ge=-90.0, le=90.0, description="Latitude (-90 to 90)")
+    lon: float = Field(..., ge=-180.0, le=180.0, description="Longitude (-180 to 180)")
 
 # ──────────────────────────────────────────────
 # x402 Payment Middleware Configuration

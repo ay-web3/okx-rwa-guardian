@@ -341,6 +341,8 @@ try:
 except Exception as e:
     raise RuntimeError(f"Failed to initialize OKX SDK: {e}")
 
+import traceback
+
 
 async def _core_risk_evaluation(payload: DynamicEvaluatePayload):
     """
@@ -386,30 +388,34 @@ async def evaluate_rwa_consumer(payload: DynamicEvaluatePayload):
     Returns a simplified summary of the asset's risk profile without heavy cryptographic data.
     Requires 0.05 USDT via x402.
     """
-    core = await _core_risk_evaluation(payload)
-    if "error" in core:
-        return {"status": "error", "message": core["error"]}
+    try:
+        core = await _core_risk_evaluation(payload)
+        if "error" in core:
+            return {"status": "error", "message": core["error"]}
+            
+        risk_score = core.get("overallRisk")
+        if risk_score is None:
+            risk_score = 0
+            
+        if risk_score > 80: risk_level = "CRITICAL"
+        elif risk_score > 50: risk_level = "HIGH"
+        elif risk_score > 20: risk_level = "MEDIUM"
+        else: risk_level = "LOW"
         
-    risk_score = core.get("overallRisk")
-    if risk_score is None:
-        risk_score = 0
-        
-    if risk_score > 80: risk_level = "CRITICAL"
-    elif risk_score > 50: risk_level = "HIGH"
-    elif risk_score > 20: risk_level = "MEDIUM"
-    else: risk_level = "LOW"
-    
-    # Return a richer, human-readable summary for consumers
-    return {
-        "status": "success",
-        "asset": payload.asset_name,
-        "location": {"lat": payload.lat, "lon": payload.lon},
-        "riskScore": risk_score,
-        "riskLevel": risk_level,
-        "recommendedAction": core.get("recommendedAction"),
-        "consumerSummary": f"The overall risk score is {risk_score}/100. The underlying AI agent network recommends: {core.get('recommendedAction')}.",
-        "evidence": core.get("evidence", [])
-    }
+        # Return a richer, human-readable summary for consumers
+        return {
+            "status": "success",
+            "asset": payload.asset_name,
+            "location": {"lat": payload.lat, "lon": payload.lon},
+            "riskScore": risk_score,
+            "riskLevel": risk_level,
+            "recommendedAction": core.get("recommendedAction"),
+            "consumerSummary": f"The overall risk score is {risk_score}/100. The underlying AI agent network recommends: {core.get('recommendedAction')}.",
+            "evidence": core.get("evidence", [])
+        }
+    except Exception as e:
+        logger.error(f"Consumer endpoint error: {e}", exc_info=True)
+        return {"status": "error", "message": f"Internal Error: {e}", "traceback": traceback.format_exc()}
 
 @app.post("/api/v1/oracle/risk_verdict")
 async def evaluate_rwa_oracle(payload: DynamicEvaluatePayload):
@@ -418,15 +424,19 @@ async def evaluate_rwa_oracle(payload: DynamicEvaluatePayload):
     Returns the exact numeric scores, full trace, and cryptographic signature for on-chain verification.
     Requires 0.05 USDT via x402.
     """
-    core = await _core_risk_evaluation(payload)
-    if "error" in core:
-        return {"status": "error", "message": core["error"]}
-        
-    # Return the full verbose payload intended for automated systems
-    return {
-        "status": "success",
-        "oraclePayload": core
-    }
+    try:
+        core = await _core_risk_evaluation(payload)
+        if "error" in core:
+            return {"status": "error", "message": core["error"]}
+            
+        # Return the full verbose payload intended for automated systems
+        return {
+            "status": "success",
+            "oraclePayload": core
+        }
+    except Exception as e:
+        logger.error(f"Oracle endpoint error: {e}", exc_info=True)
+        return {"status": "error", "message": f"Internal Error: {e}", "traceback": traceback.format_exc()}
 
 
 

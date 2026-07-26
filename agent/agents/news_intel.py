@@ -54,7 +54,7 @@ class NewsIntelAgent(BaseAgent):
 
     async def classify_news(self, news_alerts: list, property_info: dict) -> dict:
         """Use LLM to classify news sentiment and filter clickbait."""
-        if not self.client or not news_alerts:
+        if not self.client:
             return {"classified_news": [], "overall_news_sentiment": "NEUTRAL", "market_moving": False, "summary": "No news to report."}
 
         try:

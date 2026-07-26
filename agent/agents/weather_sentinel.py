@@ -54,7 +54,7 @@ class WeatherSentinelAgent(BaseAgent):
 
     async def classify_threats(self, raw_alerts: list, property_info: dict) -> dict:
         """Use LLM to classify raw weather/earthquake alerts."""
-        if not self.client or not raw_alerts:
+        if not self.client:
             return {"classified_threats": [], "overall_environmental_risk": "NONE", "summary": "No environmental threats detected."}
 
         try:

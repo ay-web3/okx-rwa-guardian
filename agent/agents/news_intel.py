@@ -82,9 +82,13 @@ class NewsIntelAgent(BaseAgent):
         properties = self.shared_state.get("properties", {})
 
         await self.log("News Intelligence online. Scanning media sources...")
+        import time
+        last_scan = 0
 
         while self._running:
-            for prop_id, prop in properties.items():
+            now = time.time()
+            if now - last_scan >= 60:
+                for prop_id, prop in properties.items():
                 await self.log(f"Scanning news for {prop['name']}...", prop_id)
 
                 # Fetch raw news + any mock news injected from frontend
@@ -101,6 +105,7 @@ class NewsIntelAgent(BaseAgent):
                     prop_id,
                     classification
                 )
+                last_scan = now
 
             # Check for API-driven on-demand requests
             try:
@@ -115,4 +120,4 @@ class NewsIntelAgent(BaseAgent):
             except asyncio.QueueEmpty:
                 pass
 
-            await asyncio.sleep(60)
+            await asyncio.sleep(1)

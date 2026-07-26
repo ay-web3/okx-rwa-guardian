@@ -15,6 +15,7 @@ from typing import Optional
 from message_bus import MessageBus
 from agents.weather_sentinel import WeatherSentinelAgent
 from agents.news_intel import NewsIntelAgent
+from agents.market_intel import MarketIntelAgent
 from agents.risk_analyst import RiskAnalystAgent
 from agents.consensus_validator import ConsensusValidatorAgent
 from agents.executor import ExecutorAgent
@@ -87,11 +88,12 @@ bus = MessageBus()
 
 weather_agent = WeatherSentinelAgent(bus=bus, shared_state=SHARED_STATE)
 news_agent = NewsIntelAgent(bus=bus, shared_state=SHARED_STATE)
+market_agent = MarketIntelAgent(bus=bus, shared_state=SHARED_STATE)
 risk_agent = RiskAnalystAgent(bus=bus, shared_state=SHARED_STATE)
 consensus_agent = ConsensusValidatorAgent(bus=bus, shared_state=SHARED_STATE)
 executor_agent = ExecutorAgent(bus=bus, shared_state=SHARED_STATE)
 
-ALL_AGENTS = [weather_agent, news_agent, risk_agent, consensus_agent, executor_agent]
+ALL_AGENTS = [weather_agent, news_agent, market_agent, risk_agent, consensus_agent, executor_agent]
 
 # ──────────────────────────────────────────────
 # Lifespan: Start/Stop all agents
@@ -100,15 +102,19 @@ ALL_AGENTS = [weather_agent, news_agent, risk_agent, consensus_agent, executor_a
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("🚀 RWA Guardian Multi-Agent System starting...")
-    logger.info(f"   API Oracle Mode Initialized. {len(ALL_AGENTS)} agents ready on standby.")
+    logger.info(f"   Oracle V2 EventBus Mode Initialized. Starting {len(ALL_AGENTS)} agent loops.")
     
-    # In Pure Oracle mode, agents are invoked per-request, not in background loops.
-    # The message bus is still active for broadcasting logs to the frontend.
+    # Start all agent loops in the background
+    tasks = [asyncio.create_task(agent.start()) for agent in ALL_AGENTS]
 
-    logger.info("🟢 All agents online. System operational.")
+    logger.info("🟢 All agents online. EventBus listening for requests.")
     yield
 
     logger.info("🔴 Shutting down multi-agent system...")
+    for agent in ALL_AGENTS:
+        agent.stop()
+    for task in tasks:
+        task.cancel()
     logger.info("System stopped.")
 
 
@@ -338,97 +344,40 @@ except Exception as e:
 
 async def _core_risk_evaluation(payload: DynamicEvaluatePayload):
     """
-    Internal helper to run the multi-agent AI pipeline.
+    Internal helper to run the multi-agent AI pipeline using the Event Bus.
     """
-    logger.info(f"Running core AI pipeline for: {payload.asset_name} at {payload.lat},{payload.lon}")
-
-    # Broadcast to the frontend terminal that the API Oracle was triggered
-    await weather_agent.log(f"API Request Received. Initializing Swarm for {payload.asset_name} ({payload.lat}, {payload.lon})...", "dynamic_query")
-    
-    await weather_agent.log("Fetching real-time environmental data (Weather, Earthquake)...", "dynamic_query")
-    weather = await fetch_weather_alerts(payload.lat, payload.lon)
-    earthquakes = await fetch_earthquake_alerts(payload.lat, payload.lon)
-    
-    await news_agent.log("Fetching live financial and local news...", "dynamic_query")
-    news = await fetch_news_alerts("dynamic", asset_name=payload.asset_name)
-    
+    prop_id = "dynamic_query"
     property_info = {
-        "id": "dynamic_query",
+        "id": prop_id,
         "name": payload.asset_name,
         "coordinates": {"lat": payload.lat, "lon": payload.lon}
     }
+    logger.info(f"Emitting evaluation request for: {payload.asset_name} at {payload.lat},{payload.lon}")
     
-    # Run through the multi-agent consensus
-    await weather_agent.log("Analyzing environmental threat data...", "dynamic_query")
-    weather_report = await weather_agent.classify_threats(weather + earthquakes, property_info)
-    await weather_agent.log(f"AI decision: {weather_report.get('summary', 'No environmental threats detected.')}", "dynamic_query")
+    # Broadcast to the frontend terminal
+    await weather_agent.log(f"API Request Received. Initializing Swarm for {payload.asset_name}...", prop_id)
     
-    await news_agent.log("Analyzing financial and news sentiment...", "dynamic_query")
-    news_report = await news_agent.classify_news(news, property_info)
-    await news_agent.log(f"AI decision: {news_report.get('summary', 'No significant news.')}", "dynamic_query")
-    
-    await risk_agent.log("Synthesizing multi-modal risk data into a single verdict...", "dynamic_query")
-    verdict = await risk_agent.synthesize("dynamic_query", [weather_report, news_report], property_info)
-    
-    await consensus_agent.log("Validating risk synthesis across the network...", "dynamic_query")
-    final_validation = await consensus_agent.validate(verdict, [weather_report, news_report], property_info)
-    
-    # Apply any safety modifications from the Consensus Validator
-    mods = final_validation.get("modifications", {})
-    if isinstance(mods, dict):
-        if mods.get("recommendedAction"):
-            verdict["recommendedAction"] = mods["recommendedAction"]
-        if mods.get("overallRisk") is not None:
-            verdict["overallRisk"] = mods["overallRisk"]
+    # Subscribe to the final result before triggering
+    result_queue = shared_bus.subscribe(MessageType.PAYLOAD_SIGNED)
 
-    # Since we are an API Oracle, the Executor merely signs the final verified payload
-    decision = final_validation.get("decision", "OVERRULED")
-    if decision == "APPROVED":
-        await executor_agent.log("✅ Consensus APPROVED. Generating cryptographic signature for payload.", "dynamic_query")
-    else:
-        await executor_agent.log("⛔ Consensus OVERRULED. Adjusting action and generating signature.", "dynamic_query")
+    from message_bus import Message
+    # Trigger the pipeline
+    await shared_bus.publish(Message(
+        type=MessageType.EVALUATION_REQUESTED,
+        sender="API Gateway",
+        property_id=prop_id,
+        payload=property_info
+    ))
     
-    # ALWAYS Generate actual cryptographic signature for the final payload
-    import json
-    from eth_account import Account
-    from eth_account.messages import encode_defunct
-    from web3_client import PRIVATE_KEY
-    
-    message = encode_defunct(text=json.dumps(verdict, sort_keys=True))
-    signed_message = Account.sign_message(message, private_key=PRIVATE_KEY)
-    verdict["signature"] = signed_message.signature.hex()
-    
-    await executor_agent.log("Oracle payload generated.", "dynamic_query")
-    
-    # Determine the definitive action after the auditor's review
-    auditor_decision = final_validation.get("decision", "OVERRULED")
-    if auditor_decision == "APPROVED":
-        final_action = verdict.get("recommendedAction", "normal")
-    else:
-        final_action = (
-            final_validation.get("finalAction")
-            or mods.get("recommendedAction")
-            or "hold"
-        )
-    
-    action_to_risk_level = {
-        "normal": "LOW",
-        "hold": "LOW",
-        "increaseMonitoring": "MEDIUM",
-        "raiseCollateralRatio": "HIGH",
-        "pauseNewBorrowing": "CRITICAL",
-        "freezeTransfers": "EXTREME"
-    }
-    risk_level = action_to_risk_level.get(final_action, "MEDIUM")
-    
-    return {
-        "final_action": final_action,
-        "risk_level": risk_level,
-        "final_validation": final_validation,
-        "verdict": verdict,
-        "auditor_decision": auditor_decision,
-        "mods": mods
-    }
+    # Wait for the Executor to publish the final signed payload
+    try:
+        while True:
+            msg: Message = await asyncio.wait_for(result_queue.get(), timeout=60)
+            if msg.property_id == prop_id:
+                return msg.payload
+    except asyncio.TimeoutError:
+        logger.error("Pipeline timed out waiting for PAYLOAD_SIGNED.")
+        return {"error": "Timeout waiting for consensus."}
 
 @app.post("/api/v1/consumer/risk_report")
 async def evaluate_rwa_consumer(payload: DynamicEvaluatePayload):

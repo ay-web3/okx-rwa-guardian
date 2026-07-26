@@ -10,6 +10,13 @@ logger = logging.getLogger(__name__)
 
 class MessageType(Enum):
     """Types of messages that flow between agents."""
+    EVALUATION_REQUESTED = "EVALUATION_REQUESTED"
+    WEATHER_ANALYZED = "WEATHER_ANALYZED"
+    NEWS_ANALYZED = "NEWS_ANALYZED"
+    MARKET_ANALYZED = "MARKET_ANALYZED"
+    RISK_SYNTHESIZED = "RISK_SYNTHESIZED"
+    CONSENSUS_REACHED = "CONSENSUS_REACHED"
+    PAYLOAD_SIGNED = "PAYLOAD_SIGNED"
     THREAT_DATA = "THREAT_DATA"
     RISK_VERDICT = "RISK_VERDICT"
     CONSENSUS_DECISION = "CONSENSUS_DECISION"
@@ -77,3 +84,21 @@ class MessageBus:
             }
             for msg in self._log[-limit:]
         ]
+
+    def get_trace(self, property_id: str) -> List[Dict]:
+        """Extract a deterministic trace of all major agent decisions for a specific property."""
+        trace = []
+        for msg in self._log:
+            if msg.property_id == property_id and msg.type in [
+                MessageType.WEATHER_ANALYZED, 
+                MessageType.NEWS_ANALYZED, 
+                MessageType.MARKET_ANALYZED, 
+                MessageType.RISK_SYNTHESIZED, 
+                MessageType.CONSENSUS_REACHED, 
+                MessageType.PAYLOAD_SIGNED
+            ]:
+                trace.append({
+                    "agent": msg.sender.split(" ", 1)[-1],  # Remove emoji
+                    "decision": msg.payload.get("summary", "Processed data")
+                })
+        return trace

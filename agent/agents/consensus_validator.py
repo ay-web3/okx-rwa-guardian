@@ -10,33 +10,25 @@ logger = logging.getLogger(__name__)
 
 CONSENSUS_PROMPT = """You are an independent auditor and devil's advocate for RWA Guardian.
 
-The Risk Analyst has produced a verdict recommending an action on a tokenized real estate smart contract. Your job is to CHALLENGE this recommendation before it reaches the blockchain.
+The Risk Analyst has produced an overallRisk score for a tokenized real estate smart contract. Your job is to CHALLENGE this score before it reaches the blockchain.
 
 You must evaluate:
-1. Is the evidence strong enough to justify the recommended action?
+1. Is the evidence strong enough to justify the risk score?
 2. Could this be a false positive? (e.g., clickbait news, distant earthquake, routine weather advisory)
-3. What is the cost of being WRONG?
-   - If we pause trading incorrectly: investors are locked out, trust is damaged
-   - If we DON'T pause and should have: investors may suffer losses
-4. Does the confidence level match the severity of the action?
+3. Does the confidence level match the severity of the score?
 
 Rules:
-- For PAUSE TRADING recommendations: You must see STRONG, CONFIRMED evidence. A single news headline is NOT enough. Require multiple sources or a genuine NOAA severe weather warning.
-- For yield adjustments: Be more lenient. Small adjustments based on moderate evidence are acceptable.
-- For health score changes: Be lenient. These are informational and don't affect the contract.
-- For "normal" actions (DO NOTHING): If the environment is safe, you MUST output "APPROVED". Only overrule a normal action if you believe a severe risk was dangerously ignored.
-
-IMPORTANT: When you overrule the analyst, you MUST provide a "finalAction" — the action the protocol should take INSTEAD of the analyst's recommendation. The buyer should never be left without a clear next step.
+- If the score matches the evidence, output "APPROVED".
+- If the score seems too high or low compared to the evidence, output "OVERRULED" and modify the score.
+- If there is highly conflicting or ambiguous evidence that a human must review, output "MANUAL_REVIEW".
 
 Output a JSON object:
 {
-  "decision": "APPROVED" | "OVERRULED",
-  "reasoning": "<detailed explanation of why you approve or overrule the analyst's recommendation>",
+  "decision": "APPROVED" | "OVERRULED" | "MANUAL_REVIEW",
+  "reasoning": "<detailed explanation of why you approve, overrule, or require manual review>",
   "modifications": {
-    "recommendedAction": <string — your recommended override action, or null to keep original>,
     "overallRisk": <int — your adjusted score, or null to keep original>
   },
-  "finalAction": "<the definitive action the protocol should take after your review — always present>",
   "risk_of_false_positive": <float 0.0-1.0>,
   "summary": "<one sentence verdict>"
 }
@@ -61,7 +53,7 @@ class ConsensusValidatorAgent(BaseAgent):
             api_key=self.api_key,
             base_url="https://api.groq.com/openai/v1"
         ) if self.api_key else None
-        self.verdict_inbox = self.subscribe(MessageType.RISK_VERDICT)
+        self.verdict_inbox = self.subscribe(MessageType.RISK_SYNTHESIZED)
 
     async def validate(self, verdict: dict, source_reports: list, property_info: dict) -> dict:
         """Run independent LLM validation on the Risk Analyst's verdict."""
@@ -95,12 +87,11 @@ class ConsensusValidatorAgent(BaseAgent):
         except Exception as e:
             logger.error(f"Consensus validation LLM failed: {e}")
             return {
-                "decision": "OVERRULED" if verdict.get("recommendedAction") in ["pauseNewBorrowing", "freezeTransfers"] else "APPROVED",
-                "reasoning": f"Validation failed ({e}). Overruling critical actions as a safety measure.",
-                "modifications": {"recommendedAction": "normal"},
-                "finalAction": "normal",
+                "decision": "MANUAL_REVIEW",
+                "reasoning": f"Validation failed ({e}). Flagging for manual review as a safety measure.",
+                "modifications": {},
                 "risk_of_false_positive": 0.8,
-                "summary": "Validation error — critical actions blocked for safety."
+                "summary": "Validation error — flagged for manual review."
             }
 
     async def run(self):
@@ -118,20 +109,19 @@ class ConsensusValidatorAgent(BaseAgent):
                 verdict = msg.payload.get("verdict", {})
                 source_reports = msg.payload.get("source_reports", [])
 
-                is_critical = verdict.get("recommendedAction") in ["pauseNewBorrowing", "freezeTransfers"]
+                is_critical = verdict.get("overallRisk", 0) > 80
 
                 if is_critical:
                     # Critical action: run full independent validation
-                    await self.log(f"⚠️ CRITICAL ACTION requested for {prop_info.get('name', prop_id)}: {verdict.get('recommendedAction')}. Running independent validation...", prop_id)
+                    await self.log(f"⚠️ CRITICAL SCORE ({verdict.get('overallRisk', 0)}) detected for {prop_info.get('name', prop_id)}. Running independent validation...", prop_id)
                     validation = await self.validate(verdict, source_reports, prop_info)
                 else:
                     # Non-critical: auto-approve with logging
-                    await self.log(f"Non-critical verdict for {prop_info.get('name', prop_id)}. Auto-approving.", prop_id)
+                    await self.log(f"Non-critical risk score for {prop_info.get('name', prop_id)}. Auto-approving.", prop_id)
                     validation = {
                         "decision": "APPROVED",
-                        "reasoning": "Non-critical action auto-approved.",
+                        "reasoning": "Non-critical score auto-approved.",
                         "modifications": {},
-                        "finalAction": verdict.get("recommendedAction", "normal"),
                         "risk_of_false_positive": 0.0,
                         "summary": "Auto-approved (non-critical)."
                     }
@@ -139,8 +129,6 @@ class ConsensusValidatorAgent(BaseAgent):
                 # Apply any modifications from the validator
                 modifications = validation.get("modifications", {})
                 final_verdict = verdict.copy()
-                if modifications.get("recommendedAction") is not None:
-                    final_verdict["recommendedAction"] = modifications["recommendedAction"]
                 if modifications.get("overallRisk") is not None:
                     final_verdict["overallRisk"] = modifications["overallRisk"]
 
@@ -152,7 +140,7 @@ class ConsensusValidatorAgent(BaseAgent):
 
                 # Publish consensus decision
                 await self.publish(
-                    MessageType.CONSENSUS_DECISION,
+                    MessageType.CONSENSUS_REACHED,
                     prop_id,
                     {
                         "decision": decision,

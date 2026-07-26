@@ -19,19 +19,17 @@ CRITICAL RULE: Most news is routine market reporting. Do NOT overreact.
 - Only classify as NEGATIVE if there's a genuine regulatory crackdown, market crash, or severe economic downturn.
 - Only classify as CATASTROPHIC if there's an imminent, confirmed disaster (not speculation).
 
-Output a JSON object:
+Output a JSON object exactly matching this schema:
 {
-  "classified_news": [
+  "summary": "<one sentence summary of the news landscape>",
+  "evidence": [
     {
-      "headline": "<original headline>",
-      "sentiment": "POSITIVE" | "NEUTRAL" | "NEGATIVE" | "CATASTROPHIC",
-      "relevance": "HIGH" | "MEDIUM" | "LOW",
-      "impact_summary": "<why this matters or doesn't matter>"
+      "source": "<origin of the news, e.g. Reuters or NYT>",
+      "severity": "<Normal|Elevated|High>",
+      "confidence": 0.0-1.0
     }
   ],
-  "overall_news_sentiment": "POSITIVE" | "NEUTRAL" | "NEGATIVE" | "CATASTROPHIC",
-  "market_moving": <true if any headline is genuinely market-moving, false otherwise>,
-  "summary": "<one sentence summary of the news landscape>"
+  "confidence": 0.0-1.0
 }
 
 Be skeptical. Financial media thrives on fear. Filter the signal from the noise.
@@ -52,6 +50,7 @@ class NewsIntelAgent(BaseAgent):
             api_key=self.api_key,
             base_url="https://api.groq.com/openai/v1"
         ) if self.api_key else None
+        self.request_inbox = self.subscribe(MessageType.EVALUATION_REQUESTED)
 
     async def classify_news(self, news_alerts: list, property_info: dict) -> dict:
         """Use LLM to classify news sentiment and filter clickbait."""
@@ -98,14 +97,22 @@ class NewsIntelAgent(BaseAgent):
 
                 # Publish to bus
                 await self.publish(
-                    MessageType.THREAT_DATA,
+                    MessageType.NEWS_ANALYZED,
                     prop_id,
-                    {
-                        "agent": "news_intel",
-                        "raw_alerts": all_news,
-                        "classification": classification,
-                        "summary": f"📰 {classification.get('summary', 'No significant news.')}"
-                    }
+                    classification
                 )
+
+            # Check for API-driven on-demand requests
+            try:
+                msg: Message = self.request_inbox.get_nowait()
+                req_prop_id = msg.property_id
+                
+                await self.log(f"Handling on-demand news request for {msg.payload.get('name', req_prop_id)}...", req_prop_id)
+                real_news = await fetch_news_alerts(req_prop_id, asset_name=msg.payload.get("name"))
+                
+                classification = await self.classify_news(real_news, msg.payload)
+                await self.publish(MessageType.NEWS_ANALYZED, req_prop_id, classification)
+            except asyncio.QueueEmpty:
+                pass
 
             await asyncio.sleep(60)

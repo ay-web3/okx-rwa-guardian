@@ -18,22 +18,21 @@ For each alert, determine:
 - risk_level: "NONE", "LOW", "MEDIUM", "HIGH", or "CRITICAL"
 - impact_summary: A brief sentence explaining why this matters for the property
 
-Output a JSON object:
+Output a JSON object exactly matching this schema:
 {
-  "classified_threats": [
+  "summary": "<one sentence summary of environmental conditions>",
+  "evidence": [
     {
-      "source": "<original source>",
-      "event": "<event type>",
-      "risk_level": "<NONE|LOW|MEDIUM|HIGH|CRITICAL>",
-      "impact_summary": "<why this matters for the property>"
+      "source": "<original source, e.g. NOAA or USGS>",
+      "severity": "<Normal|Elevated|High>",
+      "confidence": 0.0-1.0
     }
   ],
-  "overall_environmental_risk": "<NONE|LOW|MEDIUM|HIGH|CRITICAL>",
-  "summary": "<one sentence summary of environmental conditions>"
+  "confidence": 0.0-1.0
 }
 
-Be precise. A distant minor earthquake (mag < 4.0) 80km away is NONE/LOW risk.
-A Category 3+ hurricane heading directly for the property is CRITICAL.
+Be precise. A distant minor earthquake (mag < 4.0) 80km away is Normal severity.
+A Category 3+ hurricane heading directly for the property is High severity.
 Only output valid JSON. No markdown."""
 
 
@@ -51,6 +50,7 @@ class WeatherSentinelAgent(BaseAgent):
             api_key=self.api_key,
             base_url="https://api.groq.com/openai/v1"
         ) if self.api_key else None
+        self.request_inbox = self.subscribe(MessageType.EVALUATION_REQUESTED)
 
     async def classify_threats(self, raw_alerts: list, property_info: dict) -> dict:
         """Use LLM to classify raw weather/earthquake alerts."""
@@ -99,14 +99,26 @@ class WeatherSentinelAgent(BaseAgent):
 
                 # Publish to bus
                 await self.publish(
-                    MessageType.THREAT_DATA,
+                    MessageType.WEATHER_ANALYZED,
                     prop_id,
-                    {
-                        "agent": "weather_sentinel",
-                        "raw_alerts": raw_alerts,
-                        "classification": classification,
-                        "summary": f"🌊 {classification.get('summary', 'No environmental threats.')}"
-                    }
+                    classification
                 )
+
+            # Check for API-driven on-demand requests
+            try:
+                msg: Message = self.request_inbox.get_nowait()
+                req_prop_id = msg.property_id
+                req_lat = msg.payload.get("lat")
+                req_lon = msg.payload.get("lon")
+                
+                await self.log(f"Handling on-demand request for {msg.payload.get('name', req_prop_id)}...", req_prop_id)
+                weather_alerts = await fetch_weather_alerts(req_lat, req_lon)
+                earthquake_alerts = await fetch_earthquake_alerts(req_lat, req_lon)
+                raw_alerts = weather_alerts + earthquake_alerts
+                
+                classification = await self.classify_threats(raw_alerts, msg.payload)
+                await self.publish(MessageType.WEATHER_ANALYZED, req_prop_id, classification)
+            except asyncio.QueueEmpty:
+                pass
 
             await asyncio.sleep(60)

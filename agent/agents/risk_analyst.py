@@ -10,24 +10,19 @@ logger = logging.getLogger(__name__)
 
 RISK_ANALYST_PROMPT = """You are the Senior Risk Analyst (Reasoning Agent) for RWA Guardian, a multi-agent AI system protecting tokenized real estate assets.
 
-You receive classified threat data from the Data Collector agent:
+You receive classified threat data from three field agents:
 1. Weather Sentinel — environmental threats (hurricanes, earthquakes, floods)
-2. News Intelligence — market/economic/regulatory threats
+2. News Intelligence — macroeconomic and regulatory threats
+3. Market Intelligence — on-chain liquidity and crypto market threats
 
 Your job is to SYNTHESIZE all incoming intelligence and produce a multi-dimensional risk verdict for the property.
 
 Consider:
 - Cross-correlation: Does the news CONFIRM the weather threat, or is it unrelated?
 - Cumulative risk: Multiple LOW threats can compound into MEDIUM overall risk.
-- Actionable Intelligence: Don't just output a risk number. Recommend a specific action the protocol should take based on the overall risk level:
-    - Normal (0-20): "normal"
-    - Elevated (21-50): "increaseMonitoring"
-    - High (51-80): "raiseCollateralRatio"
-    - Critical (81-90): "pauseNewBorrowing"
-    - Extreme (91-100): "freezeTransfers"
 
 IMPORTANT — overallRisk MUST be computed as a weighted average, not a simple mean:
-  overallRisk = round(physicalRisk * 0.5 + economicRisk * 0.3 + liquidityRisk * 0.2)
+  overallRisk = round(physicalRisk * 0.4 + economicRisk * 0.3 + liquidityRisk * 0.3)
 Always use these exact weights. Include a "riskWeights" key showing the weights used.
 
 Output a JSON object exactly like this:
@@ -35,15 +30,13 @@ Output a JSON object exactly like this:
   "physicalRisk": <int 0-100>,
   "economicRisk": <int 0-100>,
   "liquidityRisk": <int 0-100>,
-  "overallRisk": <int 0-100, computed as physicalRisk*0.5 + economicRisk*0.3 + liquidityRisk*0.2>,
-  "riskWeights": {"physical": 0.5, "economic": 0.3, "liquidity": 0.2},
-  "recommendedAction": "normal" | "increaseMonitoring" | "raiseCollateralRatio" | "pauseNewBorrowing" | "freezeTransfers",
+  "overallRisk": <int 0-100, computed as physicalRisk*0.4 + economicRisk*0.3 + liquidityRisk*0.3>,
+  "riskWeights": {"physical": 0.4, "economic": 0.3, "liquidity": 0.3},
   "confidence": <float 0.0-1.0, how confident you are in this verdict>,
   "analysis": "<detailed reasoning explaining your synthesis of all agent inputs>",
   "caveats": "<any factors that argue AGAINST your verdict — hedges, uncertainties, or mitigating circumstances>"
 }
 
-IMPORTANT: You are recommending, not executing. The Verification Agent will review your verdict before any on-chain action is taken. Be honest about uncertainty.
 Only output valid JSON. No markdown."""
 
 
@@ -62,7 +55,9 @@ class RiskAnalystAgent(BaseAgent):
             api_key=self.api_key,
             base_url="https://api.groq.com/openai/v1"
         ) if self.api_key else None
-        self.threat_inbox = self.subscribe(MessageType.THREAT_DATA)
+        self.weather_inbox = self.subscribe(MessageType.WEATHER_ANALYZED)
+        self.news_inbox = self.subscribe(MessageType.NEWS_ANALYZED)
+        self.market_inbox = self.subscribe(MessageType.MARKET_ANALYZED)
         # Buffer to collect data from multiple agents before synthesizing
         self._threat_buffer: dict[str, list] = {}
 
@@ -96,10 +91,10 @@ class RiskAnalystAgent(BaseAgent):
             result = json.loads(response.choices[0].message.content)
             
             # LLMs often hallucinate basic arithmetic, so we enforce the formula deterministically
-            weights = result.get("riskWeights", {"physical": 0.5, "economic": 0.3, "liquidity": 0.2})
-            p_weight = weights.get("physical", 0.5)
+            weights = result.get("riskWeights", {"physical": 0.4, "economic": 0.3, "liquidity": 0.3})
+            p_weight = weights.get("physical", 0.4)
             e_weight = weights.get("economic", 0.3)
-            l_weight = weights.get("liquidity", 0.2)
+            l_weight = weights.get("liquidity", 0.3)
             
             result["overallRisk"] = round(
                 result.get("physicalRisk", 0) * p_weight +
@@ -131,40 +126,53 @@ class RiskAnalystAgent(BaseAgent):
 
         while self._running:
             try:
-                # Wait for incoming threat data (with timeout to prevent deadlock)
-                msg: Message = await asyncio.wait_for(self.threat_inbox.get(), timeout=120)
+                # Poll all three inboxes without blocking indefinitely on one
+                messages = []
+                try: messages.append(self.weather_inbox.get_nowait())
+                except asyncio.QueueEmpty: pass
+                
+                try: messages.append(self.news_inbox.get_nowait())
+                except asyncio.QueueEmpty: pass
+                
+                try: messages.append(self.market_inbox.get_nowait())
+                except asyncio.QueueEmpty: pass
 
-                prop_id = msg.property_id
-                agent_name = msg.payload.get("agent", "unknown")
+                for msg in messages:
+                    prop_id = msg.property_id
+                    agent_name = msg.sender
 
-                # Buffer the report
-                if prop_id not in self._threat_buffer:
-                    self._threat_buffer[prop_id] = []
-                self._threat_buffer[prop_id].append(msg.payload)
+                    # Buffer the report
+                    if prop_id not in self._threat_buffer:
+                        self._threat_buffer[prop_id] = []
+                    self._threat_buffer[prop_id].append(msg.payload)
 
-                await self.log(f"Received intel from {agent_name} for {properties.get(prop_id, {}).get('name', prop_id)}", prop_id)
+                    await self.log(f"Received intel from {agent_name} for {properties.get(prop_id, {}).get('name', prop_id)}", prop_id)
 
-                # Once we have reports from all data agents, synthesize
-                if len(self._threat_buffer[prop_id]) >= num_data_agents:
-                    prop_info = properties.get(prop_id, {})
-                    await self.log(f"All agents reported for {prop_info.get('name', prop_id)}. Synthesizing...", prop_id)
+                num_data_agents = 3  # Weather, News, Market
 
-                    verdict = await self.synthesize(prop_id, self._threat_buffer[prop_id], prop_info)
+                # Check buffers to see if any property is ready
+                for prop_id, buffer in list(self._threat_buffer.items()):
+                    if len(buffer) >= num_data_agents:
+                        prop_info = properties.get(prop_id, {})
+                        await self.log(f"All agents reported for {prop_info.get('name', prop_id)}. Synthesizing...", prop_id)
 
-                    # Publish the verdict
-                    await self.publish(
-                        MessageType.RISK_VERDICT,
-                        prop_id,
-                        {
-                            "verdict": verdict,
-                            "source_reports": self._threat_buffer[prop_id],
-                            "summary": f"🧠 Risk: {verdict.get('overallRisk', 0)}/100 | Action: {verdict.get('recommendedAction', 'normal')} | Confidence: {verdict.get('confidence', 0):.0%}"
-                        }
-                    )
+                        verdict = await self.synthesize(prop_id, buffer, prop_info)
 
-                    # Clear the buffer for this property
-                    self._threat_buffer[prop_id] = []
+                        # Publish the verdict
+                        await self.publish(
+                            MessageType.RISK_SYNTHESIZED,
+                            prop_id,
+                            {
+                                "verdict": verdict,
+                                "source_reports": buffer,
+                                "summary": f"🧠 Overall Risk: {verdict.get('overallRisk', 0)}/100 | Confidence: {verdict.get('confidence', 0):.0%}"
+                            }
+                        )
 
-            except asyncio.TimeoutError:
-                # No messages for 120s, that's fine
-                continue
+                        # Clear the buffer for this property
+                        self._threat_buffer[prop_id] = []
+
+                await asyncio.sleep(1)
+            except Exception as e:
+                logger.error(f"Risk Analyst error: {e}")
+                await asyncio.sleep(1)

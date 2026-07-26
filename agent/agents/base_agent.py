@@ -37,10 +37,17 @@ class BaseAgent(ABC):
         )
         await self.bus.publish(message)
 
-    async def log(self, text: str, property_id: str = "system"):
-        """Log a message to the bus for the frontend terminal and to Python logger."""
-        self.logger.info(text)
-        await self.publish(MessageType.AGENT_LOG, property_id, {"summary": text})
+    async def log(self, message: str, property_id: str = "default"):
+        """Logs action to console and pushes to the web UI if connected, and adds to trace."""
+        log_entry = f"[{self.name}] {message}"
+        self.logger.info(log_entry)
+        
+        # Append to the shared trace via the event bus
+        await self.bus.append_trace(property_id, self.name, message)
+        
+        # In a real system, you might push this to a Redis pub/sub or WebSockets
+        # For this demo, we simulate the network delay
+        await asyncio.sleep(0.5)
 
     @abstractmethod
     async def run(self):

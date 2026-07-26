@@ -17,7 +17,7 @@ class ExecutorAgent(BaseAgent):
 
     def __init__(self, bus: MessageBus, shared_state: dict):
         super().__init__(name="Executor", emoji="🔐", bus=bus, shared_state=shared_state)
-        self.decision_inbox = self.subscribe(MessageType.CONSENSUS_DECISION)
+        self.decision_inbox = self.subscribe(MessageType.CONSENSUS_REACHED)
 
     async def execute_verdict(self, prop_id: str, verdict: dict) -> str:
         """Execute approved on-chain actions based on the final verdict."""
@@ -96,16 +96,61 @@ class ExecutorAgent(BaseAgent):
                             all_raw_threats.extend(raw)
                     prop["active_threats"] = all_raw_threats
 
-                elif decision == "REJECTED":
+                elif decision in ["OVERRULED", "MANUAL_REVIEW"]:
                     await self.log(
-                        f"⛔ Consensus REJECTED action for {prop.get('name', prop_id)}. No on-chain action taken.",
+                        f"⛔ Consensus {decision} for {prop.get('name', prop_id)}.",
                         prop_id
                     )
-                    # Still update informational state (health, analysis) but NOT paused status
                     if prop:
                         overall_risk = final_verdict.get("overallRisk", 0)
                         prop["health_score"] = 100 - overall_risk
-                        prop["latest_analysis"] = f"[BLOCKED BY CONSENSUS] {final_verdict.get('analysis', 'Action rejected.')}"
+                        prop["latest_analysis"] = f"[{decision}] {final_verdict.get('analysis', 'Action rejected.')}"
+
+                # --- ORACLE V2 PAYLOAD GENERATION ---
+                import uuid
+                import time
+                from datetime import datetime, timedelta
+                from eth_account import Account
+                from eth_account.messages import encode_defunct
+                from web3_client import PRIVATE_KEY
+                
+                # We determine the action deterministically here in python based on final risk
+                final_risk = final_verdict.get("overallRisk", 0)
+                if decision == "MANUAL_REVIEW":
+                    final_action = "MANUAL_REVIEW"
+                elif final_risk > 80:
+                    final_action = "pauseNewBorrowing"
+                elif final_risk > 50:
+                    final_action = "raiseCollateralRatio"
+                elif final_risk > 20:
+                    final_action = "increaseMonitoring"
+                else:
+                    final_action = "normal"
+
+                oracle_payload = {
+                    "asset": prop.get("name", prop_id),
+                    "timestamp": datetime.utcnow().isoformat() + "Z",
+                    "oracleVersion": "2.0.0",
+                    "policyVersion": "risk-policy-v2",
+                    "overallRisk": final_risk,
+                    "recommendedAction": final_action,
+                    "expiresAt": (datetime.utcnow() + timedelta(minutes=5)).isoformat() + "Z",
+                    "nonce": str(uuid.uuid4())
+                }
+
+                if PRIVATE_KEY:
+                    message_encoded = encode_defunct(text=json.dumps(oracle_payload, sort_keys=True))
+                    signed_message = Account.sign_message(message_encoded, private_key=PRIVATE_KEY)
+                    oracle_payload["signature"] = signed_message.signature.hex()
+                    
+                oracle_payload["trace"] = self.bus.get_trace(prop_id)
+                oracle_payload["evidence"] = [
+                    ev for r in (msg.payload.get("source_reports") or []) 
+                    for ev in r.get("evidence", [])
+                ]
+
+                await self.publish(MessageType.PAYLOAD_SIGNED, prop_id, oracle_payload)
+                await self.log(f"Oracle V2 payload signed and published (Nonce: {oracle_payload['nonce'][:8]}).", prop_id)
 
             except asyncio.TimeoutError:
                 continue

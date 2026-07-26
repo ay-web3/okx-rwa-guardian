@@ -475,7 +475,7 @@
 
         .action-row {
             display: grid;
-            grid-template-columns: 120px 1fr 1fr;
+            grid-template-columns: 120px 80px 1fr 1fr;
             background: var(--bg-terminal);
             transition: background 0.3s ease;
         }
@@ -918,26 +918,31 @@
             </div>
             <div class="action-row">
                 <div class="action-cell"><span class="risk-bar risk-green">0 – 20</span></div>
+                <div class="action-cell"><span style="color: var(--text-dim); font-family: monospace; font-size: 0.9em; padding: 0.2rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px;">0</span></div>
                 <div class="action-cell"><code>normal</code></div>
                 <div class="action-cell"><span class="effect">No action needed</span></div>
             </div>
             <div class="action-row">
                 <div class="action-cell"><span class="risk-bar risk-cyan">21 – 50</span></div>
+                <div class="action-cell"><span style="color: var(--text-dim); font-family: monospace; font-size: 0.9em; padding: 0.2rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px;">1</span></div>
                 <div class="action-cell"><code>increaseMonitoring</code></div>
                 <div class="action-cell"><span class="effect">Increase polling frequency</span></div>
             </div>
             <div class="action-row">
                 <div class="action-cell"><span class="risk-bar risk-amber">51 – 80</span></div>
+                <div class="action-cell"><span style="color: var(--text-dim); font-family: monospace; font-size: 0.9em; padding: 0.2rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px;">2</span></div>
                 <div class="action-cell"><code>raiseCollateralRatio</code></div>
                 <div class="action-cell"><span class="effect">Increase collateral requirements</span></div>
             </div>
             <div class="action-row">
                 <div class="action-cell"><span class="risk-bar risk-red">81 – 90</span></div>
+                <div class="action-cell"><span style="color: var(--text-dim); font-family: monospace; font-size: 0.9em; padding: 0.2rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px;">3</span></div>
                 <div class="action-cell"><code>pauseNewBorrowing</code></div>
                 <div class="action-cell"><span class="effect">Halt new loan origination</span></div>
             </div>
             <div class="action-row">
                 <div class="action-cell"><span class="risk-bar risk-purple">91 – 100</span></div>
+                <div class="action-cell"><span style="color: var(--text-dim); font-family: monospace; font-size: 0.9em; padding: 0.2rem 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px;">4</span></div>
                 <div class="action-cell"><code>freezeTransfers</code></div>
                 <div class="action-cell"><span class="effect">Emergency freeze all transfers</span></div>
             </div>

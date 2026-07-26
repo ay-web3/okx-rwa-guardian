@@ -827,32 +827,35 @@
                 <span class="terminal-title">POST /api/v1/consumer/risk_report — 200 OK</span>
             </div>
             <div class="terminal-body" id="json-terminal-consumer">
-                <span class="t-prompt">$</span> <span class="t-cmd">curl -X POST /api/v1/consumer/risk_report \</span><br>
-                <span class="t-comment">&nbsp;&nbsp;-H "X-OKX-Payment-Signature: 0xa3f8..." \</span><br>
-                <span class="t-comment">&nbsp;&nbsp;-d '{"asset_name":"Noto Peninsula Estate","lat":37.3,"lon":137.0}'</span><br>
-                <br>
-                <span class="t-output">{</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"status"</span>: <span class="t-str">"success"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"asset"</span>: <span class="t-str">"Noto Peninsula Estate"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"location"</span>: {</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"lat"</span>: <span class="t-num">37.3</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"lon"</span>: <span class="t-num">137</span></span><br>
-                <span class="t-output">&nbsp;&nbsp;},</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"riskLevel"</span>: <span class="t-str">"LOW"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"recommendedAction"</span>: <span class="t-str">"normal"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"consumerSummary"</span>: <span class="t-str">"The overall risk level is LOW. The Noto Peninsula Estate is not currently facing any significant risks. The underlying AI agent network recommends to normal."</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"report"</span>: {</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"executiveSummary"</span>: <span class="t-str">"The Noto Peninsula Estate is not currently facing any significant risks."</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"detailedAnalysis"</span>: <span class="t-str">"Based on the reports from Weather Sentinel and News Intelligence, there are no environmental threats and no news to report. This suggests that the Noto Peninsula Estate is not currently facing any significant risks."</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"riskFactors"</span>: {</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"physical"</span>: <span class="t-str">"Normal"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"economic"</span>: <span class="t-str">"Normal"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"liquidity"</span>: <span class="t-str">"Normal"</span></span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;},</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"caveats"</span>: <span class="t-str">"The absence of threats does not guarantee that no risks will arise in the future. Continuous monitoring is still necessary to ensure the estate's safety and value."</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"auditorNotes"</span>: <span class="t-str">"The auditor approved the analyst's assessment."</span></span><br>
-                <span class="t-output">&nbsp;&nbsp;}</span><br>
-                <span class="t-output">}</span><br>
+                
+<span class="t-prompt">$</span> <span class="t-cmd">curl -X POST /api/v1/consumer/risk_report \</span><br>
+<span class="t-comment">&nbsp;&nbsp;-H "X-OKX-Payment-Signature: 0xa3f8..." \</span><br>
+<span class="t-comment">&nbsp;&nbsp;-d '{"asset_name":"Miami Beach Condo","lat":25.79,"lon":-80.12}'</span><br>
+<br>
+<span class="t-output">{</span><br>
+<span class="t-output">&nbsp;&nbsp;<span class="t-key">"status"</span>: <span class="t-str">"success"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;<span class="t-key">"asset"</span>: <span class="t-str">"Miami Beach Condo"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;<span class="t-key">"location"</span>: {</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"lat"</span>: <span class="t-num">25.79</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"lon"</span>: <span class="t-num">-80.12</span></span><br>
+<span class="t-output">&nbsp;&nbsp;},</span><br>
+<span class="t-output">&nbsp;&nbsp;<span class="t-key">"riskLevel"</span>: <span class="t-str">"ELEVATED"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;<span class="t-key">"recommendedAction"</span>: <span class="t-str">"Consider hedging exposure or purchasing supplemental flood insurance."</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;<span class="t-key">"consumerSummary"</span>: <span class="t-str">"The overall risk level is ELEVATED. While the local economy is stable, Weather Sentinel has flagged an active severe hurricane warning approaching the Miami coastline, drastically increasing physical risk."</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;<span class="t-key">"report"</span>: {</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"executiveSummary"</span>: <span class="t-str">"Miami Beach Condo faces elevated physical headwinds due to a severe hurricane warning."</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"detailedAnalysis"</span>: <span class="t-str">"News Intelligence reports normal economic conditions. However, Weather Sentinel has detected a Category 4 hurricane projected to make landfall within 48 hours, leading to an elevated physical risk score of 75."</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"riskFactors"</span>: {</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"physical"</span>: <span class="t-str">"Elevated"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"economic"</span>: <span class="t-str">"Normal"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"liquidity"</span>: <span class="t-str">"Normal"</span></span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;},</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"caveats"</span>: <span class="t-str">"Hurricane trajectories can shift rapidly. Maintain close monitoring over the next 24 hours."</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"auditorNotes"</span>: <span class="t-str">"The auditor approved the analyst's assessment."</span></span><br>
+<span class="t-output">&nbsp;&nbsp;}</span><br>
+<span class="t-output">}</span><br>
+<br>
+<span class="t-prompt">$</span> <span class="cursor"></span>
             </div>
         </div>
 
@@ -864,48 +867,78 @@
                 <span class="terminal-title">POST /api/v1/oracle/risk_verdict — 200 OK</span>
             </div>
             <div class="terminal-body" id="json-terminal-oracle">
-                <span class="t-prompt">$</span> <span class="t-cmd">curl -X POST /api/v1/oracle/risk_verdict \</span><br>
-                <span class="t-comment">&nbsp;&nbsp;-H "X-OKX-Payment-Signature: 0xa3f8..." \</span><br>
-                <span class="t-comment">&nbsp;&nbsp;-d '{"asset_name":"San Francisco Skyscraper","lat":37.77,"lon":-122.41}'</span><br>
-                <br>
-                <span class="t-output">{</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"status"</span>: <span class="t-str">"success"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"asset"</span>: <span class="t-str">"San Francisco Skyscraper"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"location"</span>: {</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"lat"</span>: <span class="t-num">37.77</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"lon"</span>: <span class="t-num">-122.41</span></span><br>
-                <span class="t-output">&nbsp;&nbsp;},</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"finalVerdict"</span>: {</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"action"</span>: <span class="t-str">"PAUSE TRADING for 24 hours to reassess the situation and gather more data before resuming trading."</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"riskLevel"</span>: <span class="t-str">"MEDIUM"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"summary"</span>: <span class="t-str">"The Risk Analyst's verdict is overruled due to the potential threat posed by the minor earthquake, and trading is paused for 24 hours to reassess the situation."</span></span><br>
-                <span class="t-output">&nbsp;&nbsp;},</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"analyst"</span>: {</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"physicalRisk"</span>: <span class="t-num">10</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"economicRisk"</span>: <span class="t-num">0</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"liquidityRisk"</span>: <span class="t-num">0</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"overallRisk"</span>: <span class="t-num">7</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"riskWeights"</span>: {</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"physical"</span>: <span class="t-num">0.5</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"economic"</span>: <span class="t-num">0.3</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"liquidity"</span>: <span class="t-num">0.2</span></span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;},</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"recommendedAction"</span>: <span class="t-str">"PAUSE TRADING"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"confidence"</span>: <span class="t-num">0.9</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"analysis"</span>: <span class="t-str">"The San Francisco Skyscraper is currently not under any significant environmental threat, with a minor earthquake occurring 80 km away having minimal potential impact. There is no news to report, and the overall news sentiment is neutral. Given the low physical risk and lack of economic or liquidity risks, the overall risk is low, and no action is recommended."</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"caveats"</span>: <span class="t-str">"The minor earthquake could potentially have unforeseen consequences, but the risk is deemed low based on the available data."</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"signature"</span>: <span class="t-str">"70df7457491186542f041b2ac0ca6492e310ff88cdcd0641e7cd6a71f9870c24780493670a3eea17668a538419fa85e03909511a96d35f395cc338730919fca61c"</span></span><br>
-                <span class="t-output">&nbsp;&nbsp;},</span><br>
-                <span class="t-output">&nbsp;&nbsp;<span class="t-key">"auditor"</span>: {</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"decision"</span>: <span class="t-str">"OVERRULED"</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"finalAction"</span>: <span class="t-str">"PAUSE TRADING for 24 hours to reassess the situation and gather more data before resuming trading."</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"risk_of_false_positive"</span>: <span class="t-num">0.2</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"reasoning"</span>: <span class="t-str">"Although the Risk Analyst's verdict is based on a low physical risk, the minor earthquake 80 km away still poses a potential threat. Given the uncertainty of unforeseen consequences, a more cautious approach is warranted. The confidence level is high, but the cost of being wrong is too great, as investors may be locked out if trading is paused incorrectly, or suffer losses if trading is not paused and a severe event occurs."</span>,</span><br>
-                <span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"summary"</span>: <span class="t-str">"The Risk Analyst's verdict is overruled due to the potential threat posed by the minor earthquake, and trading is paused for 24 hours to reassess the situation."</span></span><br>
-                <span class="t-output">&nbsp;&nbsp;}</span><br>
-                <span class="t-output">}</span><br>
-                <br>
-                <span class="t-prompt">$</span> <span class="cursor"></span>
+                
+<span class="t-prompt">$</span> <span class="t-cmd">curl -X POST /api/v1/oracle/risk_verdict \</span><br>
+<span class="t-comment">&nbsp;&nbsp;-H "X-OKX-Payment-Signature: 0xa3f8..." \</span><br>
+<span class="t-comment">&nbsp;&nbsp;-d '{"asset_name":"Vanuatu Beach Resort","lat":-16.11,"lon":167.33}'</span><br>
+<br>
+<span class="t-output">{</span><br>
+<span class="t-output">&nbsp;&nbsp;<span class="t-key">"status"</span>: <span class="t-str">"success"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;<span class="t-key">"oraclePayload"</span>: {</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"asset_name"</span>: <span class="t-str">"dynamic_e1eefc9e"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"onchain_data"</span>: {</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"schema_version"</span>: <span class="t-str">"1"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"chain_id"</span>: <span class="t-num">196</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"risk_score"</span>: <span class="t-num">57</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"action_code"</span>: <span class="t-num">2</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"timestamp"</span>: <span class="t-num">1785073071</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"expiration"</span>: <span class="t-num">1785073371</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"nonce"</span>: <span class="t-num">9857473616585970000</span></span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;},</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"signature"</span>: <span class="t-str">"911add8d3126b21c21e35034a27148460c3afff61aa1f5a88ed82e6fd24c41f578c3ba221d6d0cfd0f3708cd2c95a40926e0f64462cce1b7f6dde537c3de15ad1c"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"ai_metadata"</span>: {</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"oracle_version"</span>: <span class="t-str">"2.0.0"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"action_human_readable"</span>: <span class="t-str">"raiseCollateralRatio"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"decision_basis"</span>: {</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"weather"</span>: <span class="t-str">"elevated"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"news"</span>: <span class="t-str">"neutral"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"economic"</span>: <span class="t-str">"neutral"</span></span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"evidence"</span>: [</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"source"</span>: <span class="t-str">"USGS Earthquake"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"severity"</span>: <span class="t-str">"Elevated"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"confidence"</span>: <span class="t-num">0.8</span></span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;],</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"agent_trace"</span>: [</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"agent"</span>: <span class="t-str">"News Intel"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"time"</span>: <span class="t-str">"2026-07-26T13:37:46.022938"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"decision"</span>: <span class="t-str">"There are no active news headlines to report. The current news landscape for the Vanuatu Beach Resort is quiet, with no notable developments or updates."</span></span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"agent"</span>: <span class="t-str">"Weather Sentinel"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"time"</span>: <span class="t-str">"2026-07-26T13:37:47.683772"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"decision"</span>: <span class="t-str">"The Vanuatu Beach Resort is currently under threat from multiple earthquakes in the surrounding area. A M 6.0 earthquake occurred 82 km W of Sola, Vanuatu, and several other significant earthquakes have occurred in the region, including a M 5.1 earthquake 75 km WSW of Sola, Vanuatu, and a M 5.1 earthquake 59 km NNE of Port-Olry, Vanuatu. While the resort is not directly on top of the epicenters, the proximity and frequency of these earthquakes pose a significant threat to the property."</span></span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"agent"</span>: <span class="t-str">"Risk Analyst"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"time"</span>: <span class="t-str">"2026-07-26T13:37:50.340370"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"decision"</span>: <span class="t-str">"🧠 Overall Risk: 57/100 | Confidence: 85%\nAnalysis: The Weather Sentinel report indicates no active weather alerts, but the News Intelligence report highlights multiple significant earthquakes in the surrounding area of the Vanuatu Beach Resort. Although the resort is not directly on top of the epicenters, the proximity and frequency of these earthquakes pose a significant threat to the property. Given the lack of economic threats, the overall risk is primarily driven by the physical risk posed by the earthquakes."</span></span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"agent"</span>: <span class="t-str">"Consensus Validator"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"time"</span>: <span class="t-str">"2026-07-26T13:37:51.341896"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"decision"</span>: <span class="t-str">"⚖️ APPROVED | Auto-approved (non-critical).\nReasoning: Non-critical score auto-approved."</span></span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"agent"</span>: <span class="t-str">"Executor"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"time"</span>: <span class="t-str">"2026-07-26T13:37:51.848364"</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"decision"</span>: <span class="t-str">"Payload finalized and cryptographically signed."</span></span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;],</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"key_findings"</span>: [</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"Multiple significant earthquakes have occurred in the surrounding area of the Vanuatu Beach Resort."</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"The resort is not directly on top of the epicenters, reducing the risk level."</span>,</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-str">"There are no active news headlines or economic threats to the property."</span></span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;],</span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="t-key">"recommended_action"</span>: <span class="t-str">"Consider temporarily increasing the collateral ratio for loans secured by the Vanuatu Beach Resort to mitigate potential losses in the event of earthquake damage."</span></span><br>
+<span class="t-output">&nbsp;&nbsp;&nbsp;&nbsp;}</span><br>
+<span class="t-output">&nbsp;&nbsp;}</span><br>
+<span class="t-output">}</span><br>
+<br>
+<span class="t-prompt">$</span> <span class="cursor"></span>
             </div>
         </div>
 

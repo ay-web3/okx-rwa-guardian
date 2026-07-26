@@ -415,29 +415,13 @@ async def evaluate_rwa_consumer(payload: DynamicEvaluatePayload):
         else: risk_level = "LOW"
         
         # 1. Natural language action
-        rec_action = "Continue normal operations."
-        if action == "increaseMonitoring":
-            rec_action = "Increase monitoring frequency and alert thresholds."
-        elif action == "raiseCollateralRatio":
-            rec_action = "Increase collateral requirements immediately to hedge risk."
-        elif action == "pauseNewBorrowing":
-            rec_action = "Halt all new loan origination for this asset."
-        elif action == "freezeTransfers":
-            rec_action = "Emergency freeze: Halt all transfers and trading."
+        rec_action = ai_meta.get("recommended_action") or "Continue normal operations."
             
         # 2. Consumer Summary
-        if risk_level == "LOW":
-            consumer_summary = f"The property is currently assessed as {risk_level} risk. No significant environmental, economic, or liquidity threats were detected. Trading and lending activities can continue normally while the asset remains under continuous monitoring."
-        elif risk_level == "MEDIUM":
-            consumer_summary = f"The property is currently assessed as {risk_level} risk. Some minor threats or economic shifts were detected. Heightened monitoring is advised."
-        else:
-            consumer_summary = f"The property is currently assessed as {risk_level} risk. Immediate action is strongly recommended to protect the asset and mitigate potential losses."
+        consumer_summary = ai_meta.get("consumer_summary") or f"The property is currently assessed as {risk_level} risk."
 
         # 3. Executive Summary
-        if risk_score == 0:
-            exec_summary = "No material risks were detected during this assessment. The property remains stable, with no active weather alerts, seismic activity, or significant news events affecting its outlook."
-        else:
-            exec_summary = f"Active threats detected. The asset risk score is currently {risk_score}/100 based on recent environmental or economic events."
+        exec_summary = ai_meta.get("executive_summary") or f"Asset risk score is {risk_score}/100."
 
         # 4. Risk Factors (Normalized)
         def _normalize(val):
@@ -450,19 +434,7 @@ async def evaluate_rwa_consumer(payload: DynamicEvaluatePayload):
             auditor_decision = "The independent validation agent manually verified and signed the threat assessment due to elevated risk levels."
 
         # 9. Key Findings
-        if risk_score == 0:
-            key_findings = [
-                "No active weather alerts.",
-                "No recent earthquake activity near the property.",
-                "No significant financial or regulatory news.",
-                "Independent AI audit confirmed the assessment."
-            ]
-        else:
-            key_findings = [
-                f"Elevated risk score of {risk_score}/100 detected.",
-                f"Action trigger: {action}",
-                "Review detailed analysis for specific environmental or economic triggers."
-            ]
+        key_findings = ai_meta.get("key_findings") or [f"Elevated risk score of {risk_score}/100 detected.", f"Action trigger: {action}"]
 
         # Extract detailed analysis
         agent_trace = ai_meta.get("agent_trace", [])

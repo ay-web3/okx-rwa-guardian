@@ -32,7 +32,11 @@ Output a JSON object exactly like this:
   "riskWeights": {"physical": 0.6, "economic": 0.4},
   "confidence": <float 0.0-1.0, how confident you are in this verdict>,
   "analysis": "<detailed reasoning explaining your synthesis of all agent inputs>",
-  "caveats": "<any factors that argue AGAINST your verdict — hedges, uncertainties, or mitigating circumstances>"
+  "caveats": "<any factors that argue AGAINST your verdict — hedges, uncertainties, or mitigating circumstances>",
+  "consumerSummary": "<A natural language summary for an investor, e.g. 'The property is assessed as LOW risk. No significant threats detected. Trading can continue normally.'>",
+  "executiveSummary": "<A 1-2 sentence executive summary of the risk findings>",
+  "keyFindings": ["<finding 1>", "<finding 2>", "<finding 3>"],
+  "recommendedAction": "<A natural language recommended action for traders, e.g. 'Continue normal operations.'>"
 }
 
 Only output valid JSON. No markdown."""

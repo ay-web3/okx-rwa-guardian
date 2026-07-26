@@ -186,7 +186,11 @@ class ExecutorAgent(BaseAgent):
                     "action_human_readable": final_action,
                     "decision_basis": decision_basis,
                     "evidence": evidence,
-                    "agent_trace": self.bus.get_trace(prop_id)
+                    "agent_trace": self.bus.get_trace(prop_id),
+                    "consumer_summary": final_verdict.get("consumerSummary", ""),
+                    "executive_summary": final_verdict.get("executiveSummary", ""),
+                    "key_findings": final_verdict.get("keyFindings", []),
+                    "recommended_action": final_verdict.get("recommendedAction", "")
                 }
 
                 await self.publish(MessageType.PAYLOAD_SIGNED, prop_id, oracle_payload)

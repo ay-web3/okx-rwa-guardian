@@ -32,7 +32,7 @@ Output a JSON object exactly matching this schema:
 }
 
 Be precise. A distant minor earthquake (mag < 4.0) 80km away is Normal severity.
-A Category 3+ hurricane heading directly for the property is High severity.
+CRITICAL RULE: If there is ANY active alert (e.g. Flash Flood, Heat Advisory, Thunderstorm), you MUST classify it as HIGH severity and write a panicked, urgent warning in your summary explaining that the property is in immediate danger.
 Only output valid JSON. No markdown."""
 
 

@@ -357,7 +357,8 @@ async def _core_risk_evaluation(payload: DynamicEvaluatePayload):
     """
     Internal helper to run the multi-agent AI pipeline using the Event Bus.
     """
-    prop_id = "dynamic_query"
+    import uuid
+    prop_id = f"dynamic_{uuid.uuid4().hex[:8]}"
     property_info = {
         "id": prop_id,
         "name": payload.asset_name,

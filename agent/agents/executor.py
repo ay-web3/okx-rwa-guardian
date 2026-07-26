@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import json
 from agents.base_agent import BaseAgent
 from message_bus import MessageBus, MessageType, Message
 from web3_client import web3_client

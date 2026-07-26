@@ -20,16 +20,17 @@ Consider:
 - Cross-correlation: Does the news CONFIRM the weather threat, or is it unrelated?
 - Cumulative risk: Multiple LOW threats can compound into MEDIUM overall risk.
 
-IMPORTANT — overallRisk MUST be computed as a weighted average, not a simple mean:
-  overallRisk = round(physicalRisk * 0.6 + economicRisk * 0.4)
-Always use these exact weights. Include a "riskWeights" key showing the weights used.
+IMPORTANT — overallRisk is computed as a weighted average of physicalRisk and economicRisk.
+You have the autonomy to DYNAMICALLY assign the weights based on the severity of the situation. 
+For example, if a severe earthquake is detected, you should assign a physical weight of 0.9 or 1.0 to ensure the overall risk reflects the catastrophic physical threat, rather than being diluted by a quiet economy.
+Include a "riskWeights" key showing the dynamic weights you decided to use (they must sum to 1.0).
 
 Output a JSON object exactly like this:
 {
   "physicalRisk": <int 0-100>,
   "economicRisk": <int 0-100>,
-  "overallRisk": <int 0-100, computed as physicalRisk*0.6 + economicRisk*0.4>,
-  "riskWeights": {"physical": 0.6, "economic": 0.4},
+  "overallRisk": <int 0-100, computed as physicalRisk * physicalWeight + economicRisk * economicWeight>,
+  "riskWeights": {"physical": <float>, "economic": <float>},
   "confidence": <float 0.0-1.0, how confident you are in this verdict>,
   "analysis": "<detailed reasoning explaining your synthesis of all agent inputs>",
   "caveats": "<any factors that argue AGAINST your verdict — hedges, uncertainties, or mitigating circumstances>",
@@ -90,10 +91,10 @@ class RiskAnalystAgent(BaseAgent):
             )
             result = json.loads(response.choices[0].message.content)
             
-            # LLMs often hallucinate basic arithmetic, so we enforce the formula deterministically
-            weights = result.get("riskWeights", {"physical": 0.6, "economic": 0.4})
-            p_weight = weights.get("physical", 0.6)
-            e_weight = weights.get("economic", 0.4)
+            # LLMs often hallucinate basic arithmetic, so we enforce the formula deterministically using the dynamic weights it returned
+            weights = result.get("riskWeights", {"physical": 0.5, "economic": 0.5})
+            p_weight = weights.get("physical", 0.5)
+            e_weight = weights.get("economic", 0.5)
             
             result["overallRisk"] = round(
                 result.get("physicalRisk", 0) * p_weight +

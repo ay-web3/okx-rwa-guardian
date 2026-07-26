@@ -406,7 +406,7 @@
         /* ── Pipeline ── */
         .pipeline {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 1px;
             background: var(--border);
             border: 1px solid var(--border);
@@ -736,7 +736,7 @@
         </p>
         <div class="hero-stats reveal stagger-3">
             <div class="stat">
-                <div class="stat-value">4<span class="unit"> agents</span></div>
+                <div class="stat-value">5<span class="unit"> agents</span></div>
                 <div class="stat-label">AI Pipeline</div>
             </div>
             <div class="stat">
@@ -773,34 +773,41 @@
     <!-- Pipeline -->
     <section>
         <div class="section-tag reveal">architecture</div>
-        <h2 class="reveal">4-Agent Consensus Pipeline</h2>
-        <p class="section-sub reveal">No single AI makes a critical decision. Four distinct roles collaborate through an asynchronous message bus to eliminate hallucinations.</p>
+        <h2 class="reveal">5-Agent Consensus Pipeline</h2>
+        <p class="section-sub reveal">No single AI makes a critical decision. Five distinct roles collaborate through an asynchronous message bus to eliminate hallucinations.</p>
         <div class="pipeline reveal">
             <div class="pipe">
                 <div class="pipe-num">step 01</div>
                 <div class="pipe-icon">📡</div>
-                <div class="pipe-name">Data Collector</div>
-                <div class="pipe-desc">Gathers raw JSON from NOAA, USGS & Google News</div>
+                <div class="pipe-name">Weather Sentinel</div>
+                <div class="pipe-desc">Monitors severe weather, natural disasters & climate data</div>
                 <span class="pipe-arrow">▸</span>
             </div>
             <div class="pipe">
                 <div class="pipe-num">step 02</div>
-                <div class="pipe-icon">🧠</div>
-                <div class="pipe-name">Reasoning Agent</div>
-                <div class="pipe-desc">Multi-dimensional risk analysis & action recommendation</div>
+                <div class="pipe-icon">📰</div>
+                <div class="pipe-name">News Intel</div>
+                <div class="pipe-desc">Analyzes macroeconomic shifts & global news</div>
                 <span class="pipe-arrow">▸</span>
             </div>
             <div class="pipe">
                 <div class="pipe-num">step 03</div>
-                <div class="pipe-icon">⚖️</div>
-                <div class="pipe-name">Verification Agent</div>
-                <div class="pipe-desc">Audits evidence, confidence & logical consistency</div>
+                <div class="pipe-icon">🧠</div>
+                <div class="pipe-name">Risk Analyst</div>
+                <div class="pipe-desc">Multi-dimensional risk analysis & action recommendation</div>
                 <span class="pipe-arrow">▸</span>
             </div>
             <div class="pipe">
                 <div class="pipe-num">step 04</div>
+                <div class="pipe-icon">⚖️</div>
+                <div class="pipe-name">Consensus Validator</div>
+                <div class="pipe-desc">Audits evidence, confidence & logical consistency</div>
+                <span class="pipe-arrow">▸</span>
+            </div>
+            <div class="pipe">
+                <div class="pipe-num">step 05</div>
                 <div class="pipe-icon">🔐</div>
-                <div class="pipe-name">Signer</div>
+                <div class="pipe-name">Executor</div>
                 <div class="pipe-desc">Cryptographic signature for provenance & authenticity</div>
             </div>
         </div>

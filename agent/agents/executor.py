@@ -116,45 +116,55 @@ class ExecutorAgent(BaseAgent):
                 from web3_client import PRIVATE_KEY
                 
                 # We determine the action deterministically here in python based on final risk
-                final_risk = final_verdict.get("overallRisk")
-                if final_risk is None:
-                    final_risk = 0
+                final_risk = final_verdict.get("overallRisk", 0)
                 
                 if decision == "MANUAL_REVIEW":
                     final_action = "MANUAL_REVIEW"
+                    action_code = 99
                 elif final_risk > 80:
                     final_action = "pauseNewBorrowing"
+                    action_code = 3
                 elif final_risk > 50:
                     final_action = "raiseCollateralRatio"
+                    action_code = 2
                 elif final_risk > 20:
                     final_action = "increaseMonitoring"
+                    action_code = 1
                 else:
                     final_action = "normal"
+                    action_code = 0
 
+                timestamp_unix = int(time.time())
+                
                 oracle_payload = {
-                    "asset": prop.get("name", prop_id),
-                    "timestamp": datetime.utcnow().isoformat() + "Z",
-                    "oracleVersion": "2.0.0",
-                    "policyVersion": "risk-policy-v2",
-                    "overallRisk": final_risk,
-                    "recommendedAction": final_action,
-                    "expiresAt": (datetime.utcnow() + timedelta(minutes=5)).isoformat() + "Z",
-                    "nonce": str(uuid.uuid4())
+                    "asset_name": prop.get("name", prop_id),
+                    "onchain_data": {
+                        "risk_score": final_risk,
+                        "action_code": action_code,
+                        "timestamp": timestamp_unix,
+                        "expiration": timestamp_unix + 300,
+                        "nonce": int(uuid.uuid4().int >> 192) # Random uint64
+                    }
                 }
 
                 if PRIVATE_KEY:
-                    message_encoded = encode_defunct(text=json.dumps(oracle_payload, sort_keys=True))
+                    # In a real app this would be keccak256(abi.encode(...))
+                    message_encoded = encode_defunct(text=json.dumps(oracle_payload["onchain_data"], sort_keys=True))
                     signed_message = Account.sign_message(message_encoded, private_key=PRIVATE_KEY)
                     oracle_payload["signature"] = signed_message.signature.hex()
                     
-                oracle_payload["trace"] = self.bus.get_trace(prop_id)
-                oracle_payload["evidence"] = [
-                    ev for r in (msg.payload.get("source_reports") or []) 
-                    for ev in r.get("evidence", [])
-                ]
+                oracle_payload["ai_metadata"] = {
+                    "oracle_version": "2.0.0",
+                    "action_human_readable": final_action,
+                    "evidence": [
+                        ev for r in (msg.payload.get("source_reports") or []) 
+                        for ev in r.get("evidence", [])
+                    ],
+                    "agent_trace": self.bus.get_trace(prop_id)
+                }
 
                 await self.publish(MessageType.PAYLOAD_SIGNED, prop_id, oracle_payload)
-                await self.log(f"Oracle V2 payload signed and published (Nonce: {oracle_payload['nonce'][:8]}).", prop_id)
+                await self.log(f"Oracle V2 payload signed and published.", prop_id)
 
             except asyncio.TimeoutError:
                 continue

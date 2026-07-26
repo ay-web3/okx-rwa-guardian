@@ -97,8 +97,22 @@ class MessageBus:
                 MessageType.CONSENSUS_REACHED, 
                 MessageType.PAYLOAD_SIGNED
             ]:
+                agent_name = msg.sender.split(" ", 1)[-1]  # Remove emoji
+                decision_text = msg.payload.get("summary", "Processed data")
+                
+                # Extract detailed LLM reasoning if available
+                if msg.type == MessageType.RISK_SYNTHESIZED:
+                    analysis = msg.payload.get("verdict", {}).get("analysis")
+                    if analysis:
+                        decision_text = f"{decision_text}\n\nAnalysis: {analysis}"
+                        
+                elif msg.type == MessageType.CONSENSUS_REACHED:
+                    reasoning = msg.payload.get("validation", {}).get("reasoning")
+                    if reasoning:
+                        decision_text = f"{decision_text}\n\nReasoning: {reasoning}"
+                        
                 trace.append({
-                    "agent": msg.sender.split(" ", 1)[-1],  # Remove emoji
-                    "decision": msg.payload.get("summary", "Processed data")
+                    "agent": agent_name,
+                    "decision": decision_text
                 })
         return trace

@@ -121,6 +121,9 @@ class ExecutorAgent(BaseAgent):
                 if decision == "MANUAL_REVIEW":
                     final_action = "MANUAL_REVIEW"
                     action_code = 99
+                elif final_risk > 90:
+                    final_action = "freezeTransfers"
+                    action_code = 4
                 elif final_risk > 80:
                     final_action = "pauseNewBorrowing"
                     action_code = 3

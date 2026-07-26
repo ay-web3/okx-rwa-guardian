@@ -25,6 +25,13 @@ You have the autonomy to DYNAMICALLY assign the weights based on the severity of
 For example, if a severe earthquake is detected, you should assign a physical weight of 0.9 or 1.0 to ensure the overall risk reflects the catastrophic physical threat, rather than being diluted by a quiet economy.
 Include a "riskWeights" key showing the dynamic weights you decided to use (they must sum to 1.0).
 
+CRITICAL REQUIREMENT: To ensure your text aligns with the smart contract, your `recommendedAction` MUST match the following `overallRisk` thresholds:
+- 0-20: Normal operations
+- 21-50: Increase monitoring
+- 51-80: Raise collateral requirements
+- 81-90: Pause new borrowing
+- 91-100: Emergency freeze all transfers
+
 Output a JSON object exactly like this:
 {
   "physicalRisk": <int 0-100>,

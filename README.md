@@ -31,6 +31,79 @@ No single AI makes a critical decision. Five specialized agents collaborate thro
 | 4 | ⚖️ **Consensus Validator** | Independent auditor and devil's advocate — challenges the Analyst's findings to block false positives |
 | 5 | 🔐 **Executor** | Finalizes the consensus verdict and cryptographically signs the payload with an EIP-191 signature |
 
+### System Architecture
+
+```mermaid
+flowchart TB
+    subgraph DS["🌍 Real-World Data Sources"]
+        NOAA["NOAA Weather API"]
+        USGS["USGS Earthquake API"]
+        NEWS["Google News RSS"]
+    end
+
+    subgraph SWARM["🤖 5-Agent AI Swarm"]
+        direction TB
+        WS["📡 Weather Sentinel"]
+        NI["📰 News Intelligence"]
+        RA["🧠 Risk Analyst"]
+        CV["⚖️ Consensus Validator"]
+        EX["🔐 Executor"]
+        WS --> RA
+        NI --> RA
+        RA --> CV
+        CV -->|"Approved ✅"| EX
+        CV -->|"Rejected ❌"| RA
+    end
+
+    subgraph PAY["💰 X402 Payment Layer"]
+        direction LR
+        REQ["402 Payment Required"]
+        SIG["Payment Signature"]
+        SET["On-Chain Settlement"]
+        REQ --> SIG --> SET
+    end
+
+    subgraph API["📡 Dual API Endpoints"]
+        CR["/consumer/risk_report\n(Human-readable JSON)"]
+        OV["/oracle/risk_verdict\n(EIP-191 Signed Payload)"]
+    end
+
+    subgraph CONSUMERS["🏦 Consumers"]
+        DASH["DeFi Dashboards"]
+        BOTS["Trading Bots"]
+        SC["Smart Contracts"]
+    end
+
+    NOAA --> WS
+    USGS --> WS
+    NEWS --> NI
+    EX -->|"Signed Verdict"| API
+    PAY --- API
+    CR --> DASH
+    CR --> BOTS
+    OV --> SC
+```
+
+### Payment Flow
+
+```mermaid
+sequenceDiagram
+    participant C as Consumer Agent
+    participant API as RWA Guardian API
+    participant X as X402 Middleware
+    participant XL as X Layer Blockchain
+
+    C->>API: POST /api/v1/oracle/risk_verdict
+    API->>X: Check payment
+    X-->>C: 402 Payment Required + Invoice
+    C->>C: Sign payment with Agentic Wallet
+    C->>API: Replay request + Payment Signature
+    X->>XL: Settle 0.05 USDT on-chain
+    XL-->>X: Settlement confirmed ✅
+    API->>API: 5-Agent Swarm processes request
+    API-->>C: 200 OK + Signed Risk Verdict
+```
+
 ---
 
 ## ⚙️ How It Works

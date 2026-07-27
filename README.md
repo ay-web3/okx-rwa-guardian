@@ -158,10 +158,11 @@ Concise, optimized JSON for smart contracts with an EIP-191 cryptographic signat
 
 | Risk Score | Action Code | Action Label | Protocol Effect |
 |---|---|---|---|
-| 0–20 | `0` | `normalOperations` | No action needed |
+| 0–20 | `0` | `normal` | No action needed |
 | 21–50 | `1` | `increaseMonitoring` | Increase polling frequency |
 | 51–80 | `2` | `raiseCollateralRatio` | Increase collateral requirements |
-| 81–100 | `3` | `pauseNewBorrowing` | Halt new loan origination |
+| 81–90 | `3` | `pauseNewBorrowing` | Halt new loan origination |
+| 91–100 | `4` | `freezeTransfers` | Emergency freeze all transfers |
 
 ### Request Body
 

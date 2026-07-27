@@ -1,117 +1,126 @@
-# 🛡️ RWA Guardian (OKX.AI Hackathon Submission)
+# 🛡️ RWA Guardian — AI Decision Oracle for Tokenized Real-World Assets
 
-**RWA Guardian** is an autonomous, multi-agent AI risk management system designed for tokenized Real-World Assets (RWAs) on the **OKX X Layer**. 
+> **Agent #6007** on the [OKX.AI Marketplace](https://okx.ai) · Live & Earning
 
-Acting as an **Agentic Service Provider (ASP)**, RWA Guardian bridges the physical world and the blockchain. It continuously monitors real-world APIs for environmental and economic threats, reaches a multi-agent consensus, and delivers cryptographically signed instruction payloads to developers and traders via OKX Nano-payments.
+**RWA Guardian** is an autonomous, multi-agent AI swarm that acts as a **Reasoning Oracle** — bridging the physical world and the blockchain. It continuously monitors real-world data sources for environmental and economic threats, reaches multi-agent consensus, and delivers cryptographically signed (EIP-191) risk verdicts to smart contracts and DeFi protocols via the OKX X402 Agent Payments Protocol.
 
-![RWA Guardian Dashboard](https://images.unsplash.com/photo-1639762681485-074b7f4ec651?auto=format&fit=crop&w=1200&q=80)
-
-## 🏆 OKX.AI Hackathon Fit
-
-This project was built specifically for the **OKX.AI Genesis Hackathon**. It perfectly demonstrates the power of Agentic Service Providers in DeFi:
-1. **Agent-to-Agent Commerce:** Uses the OKX Agent Payments Protocol (APP) to charge nano-payments (0.05 USDT) to external bots in exchange for AI risk intelligence.
-2. **Multi-Agent Swarm Architecture:** Instead of a monolithic LLM script, we implemented a robust 4-agent pipeline to eliminate AI hallucinations and false positives.
-3. **Real-World Integration:** Brings off-chain physical data (NOAA, USGS) on-chain via AI reasoning rather than traditional, rigid oracles.
+🌐 **Live Demo:** [okx-rwa-guardian.onrender.com](https://okx-rwa-guardian.onrender.com)
+📄 **API Docs:** [okx-rwa-guardian.onrender.com/docs](https://okx-rwa-guardian.onrender.com/docs)
 
 ---
 
-## 🧠 The Multi-Agent Swarm Architecture
+## 🏆 OKX.AI Genesis Hackathon
 
-To ensure the safety of on-chain assets, no single AI makes a critical decision. We built an asynchronous message bus where 4 distinct roles collaborate:
+This project was built for the **OKX.AI Genesis Hackathon**. It demonstrates the full power of the Agent Economy:
 
-1. 📡 **Data Collector:** Gathers raw environmental (NOAA/USGS) and economic (Google News) JSON data.
-2. 🧠 **Reasoning Agent (Risk Analyst):** Synthesizes the heterogenous data to produce multi-dimensional physical, economic, and liquidity risk scores, and recommends protocol actions (e.g., `raiseCollateralRatio`).
-3. ⚖️ **Verification Agent:** Acts as an independent auditor. It actively checks the Reasoning Agent's evidence, confidence, and consistency before approving critical actions.
-4. 🔐 **Signer:** The agent holding the ASP's private keys. It cryptographically signs the final consensus payload (the "Signal"). This signature allows protocols to verify the payload originated from RWA Guardian and was not modified in transit, ensuring strict provenance and authenticity.
-
----
-
-## ⚙️ How It Works (The "Signal vs. Action" Model)
-
-RWA Guardian is fully integrated with the **OKX Agent Payments Protocol (APP)** and the **OKX Agentic Wallet**. We operate as a **Pure AI Decision Oracle**, selling our 4-agent consensus directly to other Web3 agents via nano-payments.
-
-By splitting the architecture into "Signal" (Our API) and "Action" (The Client's Wallet), we achieve 100% security with zero gas-abstraction issues.
-
-### The Target Markets
-
-**1. Protocol Developers (Smart Contract Security)**
-A DeFi protocol developer connects their own local OKX Agentic Wallet to our ASP. They pay us **0.05 USDT** via the APP header to hit our `POST /api/v1/oracle/risk_verdict` endpoint. Our AI swarm processes the real-world data and returns a cryptographically signed instruction payload with structured actions. The developer's *own* local Agentic Wallet verifies the signature and executes the transaction.
-
-**2. Algorithmic Traders & Retail Users (Informational Risk)**
-Traders pay us **0.05 USDT** to feed our risk assessments directly into their terminal via our `POST /api/v1/consumer/risk_report` endpoint. They get a human-readable executive summary of the real-world threats and can quickly dump the token or open a short position on a DEX.
+1. **Machine-to-Machine Commerce** — Uses the OKX X402 Agent Payments Protocol to charge 0.05 USDT per query. Autonomous agents pay each other for high-value reasoning in real time.
+2. **Multi-Agent Swarm Architecture** — A 5-agent hierarchical pipeline with consensus validation to eliminate AI hallucinations and false positives.
+3. **Reasoning Oracle** — Goes beyond raw data feeds. Correlates weather, seismic, and news intelligence to produce actionable protocol directives that smart contracts can verify and execute on-chain.
 
 ---
 
-## 🛠️ Tech Stack
+## 🧠 The 5-Agent Swarm Architecture
 
-*   **AI/LLM:** Llama 3 (via Groq API) for ultra-fast, low-latency multi-agent reasoning.
-*   **Backend:** Python 3, FastAPI, Asyncio (Custom Zero-Dependency Message Bus).
-*   **Blockchain Integration:** Web3.py, Ethers.js, Solidity.
-*   **Network:** OKX X Layer Testnet (Chain ID 1952).
-*   **Frontend:** Vanilla JS, CSS3 (Glassmorphism UI), HTML5.
-*   **Data Oracles:** NOAA Weather API, USGS Earthquake API, Google News RSS.
+No single AI makes a critical decision. Five specialized agents collaborate through an asynchronous message bus:
+
+| # | Agent | Role |
+|---|---|---|
+| 1 | 📡 **Weather Sentinel** | Ingests live environmental data from NOAA and USGS — severe weather, seismic activity, climate threats |
+| 2 | 📰 **News Intelligence** | Scans global news feeds via Google News, filtering noise to surface genuine regulatory and economic risks |
+| 3 | 🧠 **Senior Risk Analyst** | Synthesizes raw intelligence into a multi-dimensional risk score using dynamic weighting |
+| 4 | ⚖️ **Consensus Validator** | Independent auditor and devil's advocate — challenges the Analyst's findings to block false positives |
+| 5 | 🔐 **Executor** | Finalizes the consensus verdict and cryptographically signs the payload with an EIP-191 signature |
 
 ---
 
-## 📡 API Endpoints & Sample Responses
+## ⚙️ How It Works
 
-🔗 **Live API:** [`https://okx-rwa-guardian.onrender.com`](https://okx-rwa-guardian.onrender.com)
+RWA Guardian operates as an **Agentic Service Provider (ASP)** in the OKX.AI ecosystem. When an external DeFi protocol, trading bot, or AI agent queries the API, they're met with a `402 Payment Required` challenge. Using their OKX Agentic Wallet, the consumer pays a **0.05 USDT nano-fee** — settled instantly on X Layer — to unlock the analysis.
 
-Both endpoints require a **0.05 USDT** X402 Nano-Payment signature in the `X-OKX-Payment-Signature` header.
+### Dual Endpoints
 
-### 1. Consumer Risk Report
+#### 1. Consumer Risk Report
 **`POST /api/v1/consumer/risk_report`**
 
-Provides a highly readable, nested analysis for retail investors and dashboards.
+Rich, detailed JSON for human users, dashboards, and frontends.
 
 ```json
 {
-  "asset_name": "Tokyo Commercial Plaza",
-  "consumerSummary": "🚨 High Risk: 72/100 | Action: raiseCollateralRatio",
+  "status": "success",
+  "asset": "Miami Beach Condo",
+  "location": { "lat": 25.79, "lon": -80.13 },
+  "riskLevel": "MODERATE",
+  "overallScore": { "score": 42, "max": 100 },
+  "recommendedAction": "increaseMonitoring",
+  "consumerSummary": "The property is currently assessed as MODERATE risk.",
   "report": {
-    "executiveSummary": "The asset faces a significant threat from a 7.2 magnitude earthquake near Tokyo.",
+    "executiveSummary": "Asset risk score is 42/100.",
+    "keyFindings": ["Tropical storm activity detected in the region"],
     "detailedAnalysis": "...",
-    "riskFactors": {
-      "physicalRisk": 74,
-      "economicRisk": 61,
-      "liquidityRisk": 49
-    },
-    "caveats": "Insurance costs remain stable; no regulatory changes detected.",
-    "auditorNotes": "Approved by Verification Agent."
+    "caveats": "..."
   }
 }
 ```
 
-### 2. Oracle Risk Verdict
+#### 2. Oracle Risk Verdict
 **`POST /api/v1/oracle/risk_verdict`**
 
-Provides a structured, cryptographically signed payload for on-chain smart contracts.
+Concise, optimized JSON for smart contracts with an EIP-191 cryptographic signature.
 
 ```json
 {
-  "asset_name": "Tokyo Commercial Plaza",
-  "overallRisk": 68,
-  "recommendedAction": "raiseCollateralRatio",
-  "confidence": 0.94,
+  "status": "success",
+  "asset": "Miami Beach Condo",
+  "risk_score": 42,
+  "action_code": 1,
+  "action_label": "increaseMonitoring",
+  "timestamp": "2026-07-27T21:00:00Z",
+  "oracle_address": "0x1fd66d9e94a16db5a55bc03400282484962e2e8b",
   "signature": "0x3a8f...c4e1",
-  "auditor_trace": "...",
-  "raw_scores": {
-    "physicalRisk": 74,
-    "economicRisk": 61,
-    "liquidityRisk": 49
-  }
+  "message_hash": "0x7b2c...9d3f"
 }
 ```
 
 ### Action Space
 
-| Overall Risk | Recommended Action | Protocol Effect |
-|---|---|---|
-| 0–20 | `normal` | No action needed |
-| 21–50 | `increaseMonitoring` | Increase polling frequency |
-| 51–80 | `raiseCollateralRatio` | Increase collateral requirements |
-| 81–90 | `pauseNewBorrowing` | Halt new loan origination |
-| 91–100 | `freezeTransfers` | Emergency freeze all transfers |
+| Risk Score | Action Code | Action Label | Protocol Effect |
+|---|---|---|---|
+| 0–20 | `0` | `normalOperations` | No action needed |
+| 21–50 | `1` | `increaseMonitoring` | Increase polling frequency |
+| 51–80 | `2` | `raiseCollateralRatio` | Increase collateral requirements |
+| 81–100 | `3` | `pauseNewBorrowing` | Halt new loan origination |
+
+### Request Body
+
+All endpoints accept the same payload:
+
+```json
+{
+  "asset_name": "Miami Beach Condo",
+  "lat": 25.79,
+  "lon": -80.13
+}
+```
+
+| Field | Type | Required | Constraints |
+|---|---|---|---|
+| `asset_name` | string | ✅ | Max 100 characters |
+| `lat` | float | ✅ | -90.0 to 90.0 |
+| `lon` | float | ✅ | -180.0 to 180.0 |
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Backend** | Python 3 · FastAPI · Asyncio (Custom Message Bus) |
+| **Blockchain** | Solidity · X Layer (Chain ID 196) |
+| **Frontend** | Vanilla JS · CSS3 · HTML5 |
+| **Payments** | OKX X402 Agent Payments Protocol |
+| **Data Sources** | NOAA Weather API · USGS Earthquake API · Google News |
+| **Cryptography** | EIP-191 Signed Payloads |
+| **Hosting** | Render (Auto-deploy from GitHub) |
 
 ---
 
@@ -119,9 +128,11 @@ Provides a structured, cryptographically signed payload for on-chain smart contr
 
 ### Prerequisites
 * Python 3.9+
-* A Groq API Key (or OpenAI API Key)
+* Node.js 18+ (for testing scripts)
+* OKX Agentic Wallet (via `onchainos` CLI)
 
-### 1. Setup the Backend (Multi-Agent Swarm)
+### 1. Setup the Backend
+
 ```bash
 cd agent
 python -m venv venv
@@ -130,32 +141,40 @@ pip install -r requirements.txt
 ```
 
 Create a `.env` file in the `agent` directory:
+
 ```env
-GROQ_API_KEY=your_groq_api_key
-PRIVATE_KEY=your_wallet_private_key_with_xlayer_testnet_funds
+PRIVATE_KEY=your_wallet_private_key
 ```
 
-Start the orchestration server:
+Start the server:
+
 ```bash
-python main.py
+uvicorn main:app --host 0.0.0.0 --port 10000
 ```
 
-### 2. Start the Frontend Dashboard
-Open a new terminal:
+### 2. Start the Frontend
+
 ```bash
 cd frontend
 python -m http.server 8081
 ```
 
-Visit `http://127.0.0.1:8081` in your browser. 
-Click **"SIMULATE DISASTER"** to watch the multi-agent swarm detect the anomaly, debate it, and lock down the smart contract in real-time!
+Visit `http://127.0.0.1:8081` in your browser.
 
 ---
 
-## 📜 Smart Contract
+## 🤖 OKX.AI Marketplace
 
-The `RWAToken.sol` contract is currently deployed and verified on the **OKX X Layer Testnet**.
-* **Contract Address:** `0xbbAd97DabBa50807F38F9cF3812F2E7B1305b7E6`
+| Field | Value |
+|---|---|
+| **Agent ID** | #6007 |
+| **Name** | RWA Guardian |
+| **Role** | Agentic Service Provider (ASP) |
+| **Status** | Active ✅ |
+| **Approval** | Listed — eligible for task recommendations |
+| **Cost** | 0.05 USDT per query |
+| **Chain** | X Layer (`eip155:196`) |
+| **Wallet** | `0x1fd66d9e94a16db5a55bc03400282484962e2e8b` |
 
 ---
 
@@ -166,4 +185,3 @@ This project is licensed under the [MIT License](LICENSE).
 ## 🤝 Team
 
 Built by [**@Ay-web3**](https://github.com/ay-web3) for the OKX.AI Genesis Hackathon.
-
